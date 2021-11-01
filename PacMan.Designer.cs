@@ -1,7 +1,7 @@
 ﻿
 namespace PacMan
 {
-    partial class Main
+    partial class PacMan
     {
         /// <summary>
         /// 필수 디자이너 변수입니다.
@@ -40,7 +40,7 @@ namespace PacMan
             this.Btn_Play.TabIndex = 0;
             this.Btn_Play.Text = "PLAY";
             this.Btn_Play.UseVisualStyleBackColor = true;
-            this.Btn_Play.Click += new System.EventHandler(this.btn_Play_Click);
+            this.Btn_Play.Click += new System.EventHandler(this.Btn_Play_Click);
             // 
             // Form1
             // 
@@ -48,8 +48,8 @@ namespace PacMan
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.Btn_Play);
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Name = "Menu";
+            this.Text = "Menu";
             this.ResumeLayout(false);
 
         }

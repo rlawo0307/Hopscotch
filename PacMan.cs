@@ -10,14 +10,14 @@ using System.Windows.Forms;
 
 namespace PacMan
 {
-    public partial class Main : Form
+    public partial class PacMan : Form
     {
-        public Main()
+        public PacMan()
         {
             InitializeComponent();
         }
 
-        private void btn_Play_Click(object sender, EventArgs e)
+        private void Btn_Play_Click(object sender, EventArgs e)
         {
             Game gameform = new Game();
             gameform.ShowDialog();
