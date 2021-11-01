@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace PacMan
+namespace Hopscotch
 {
     public partial class Game : Form
     {

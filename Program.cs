@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace PacMan
+namespace Hopscotch
 {
     static class Program
     {
@@ -16,7 +16,7 @@ namespace PacMan
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new PacMan());
+            Application.Run(new Hopscotch());
         }
     }
 }

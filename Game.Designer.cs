@@ -1,5 +1,5 @@
 ﻿
-namespace PacMan
+namespace Hopscotch
 {
     partial class Game
     {
@@ -37,7 +37,7 @@ namespace PacMan
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Name = "Game";
-            this.Text = "PacMan";
+            this.Text = "HopScotch";
             this.ResumeLayout(false);
 
         }

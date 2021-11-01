@@ -8,11 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace PacMan
+namespace Hopscotch
 {
-    public partial class PacMan : Form
+    public partial class Hopscotch : Form
     {
-        public PacMan()
+        public Hopscotch()
         {
             InitializeComponent();
         }
