@@ -45,6 +45,7 @@ namespace Hopscotch
             // Btn_Player
             // 
             this.Btn_Player.Cursor = System.Windows.Forms.Cursors.Default;
+            this.Btn_Player.FlatAppearance.BorderColor = System.Drawing.Color.Yellow;
             this.Btn_Player.FlatAppearance.BorderSize = 0;
             this.Btn_Player.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.Btn_Player.Location = new System.Drawing.Point(76, 242);

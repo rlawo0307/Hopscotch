@@ -32,12 +32,23 @@ namespace Hopscotch
             Btn_Player.BackColor = Btn_Player.ForeColor = Btn_Player.FlatAppearance.BorderColor = Color.Red;
             player_x = ImageBoard.Location.X;
             player_y = ImageBoard.Location.Y;
-            PlayerMove();
-            
+            //PlayerMove();
+
             KeyPreview = true;
             this.KeyDown += Key_Down;
 
             //g.Clear(Color.Red);
+
+            Play();
+        }
+
+        private void Play()
+        {
+            //PlayerMove();
+            Btn_Player.Location = new Point(10+player_x,10+player_y);
+            DrawRec(10, 10, 30, 30, Color.Blue);
+            //DrawRec(player_x - ImageBoard.Location.X, player_y - ImageBoard.Location.Y, Constants.Player_Width, Constants.Player_Height, Color.Blue);
+
         }
 
         private void DrawRec(int x, int y, int width, int height, Color c)
@@ -52,7 +63,7 @@ namespace Hopscotch
         private void PlayerMove()
         {
             Btn_Player.Location = new Point(player_x, player_y);
-            DrawRec(player_x - ImageBoard.Location.X, player_y- ImageBoard.Location.Y, Constants.Player_Width, Constants.Player_Height, Color.Blue);
+            //DrawRec(player_x - ImageBoard.Location.X, player_y- ImageBoard.Location.Y, Constants.Player_Width, Constants.Player_Height, Color.Blue);
         }
 
         private void Key_Down(object sender, KeyEventArgs e)
