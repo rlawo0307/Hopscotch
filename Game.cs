@@ -19,7 +19,28 @@ namespace Hopscotch
             ImageBoard.Size = new Size(570, 450);
             ImageBoard.SizeMode = PictureBoxSizeMode.StretchImage;
             ImageBoard.Image = Image.FromFile("./res/Image/Image1.jpg");
-            //ImageBoard.BackgroundImage = Image.FromFile("./res/Image/Image1.jpg");
+
+            Graphics g = Graphics.FromImage((System.Drawing.Image)ImageBoard.Image);
+            DrawRec(g, 0,0, ImageBoard.Image.Width, ImageBoard.Height);
+
+            //SolidBrush sb = new SolidBrush(Color.Red);
+            //g.DrawEllipse(Pens.Red, -1, -1, 10, 10);
+
+            Play();
+            }
+
+        private void Play()
+        {
+           
+        }
+
+        private void DrawRec(Graphics g, int x, int y, int width, int height)
+        {
+            SolidBrush sb = new SolidBrush(Color.Gray);
+            Rectangle rec = new Rectangle(x,y, width, height);
+
+            g.FillRectangle(sb, rec);
+            sb.Dispose();
         }
     }
 }
