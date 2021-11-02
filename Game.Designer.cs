@@ -29,19 +29,35 @@ namespace Hopscotch
         /// </summary>
         private void InitializeComponent()
         {
+            this.ImageBoard = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.ImageBoard)).BeginInit();
             this.SuspendLayout();
+            // 
+            // ImageBoard
+            // 
+            this.ImageBoard.Location = new System.Drawing.Point(12, 12);
+            this.ImageBoard.Name = "ImageBoard";
+            this.ImageBoard.Size = new System.Drawing.Size(776, 426);
+            this.ImageBoard.TabIndex = 0;
+            this.ImageBoard.TabStop = false;
             // 
             // Game
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.ImageBoard);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.Name = "Game";
             this.Text = "HopScotch";
+            ((System.ComponentModel.ISupportInitialize)(this.ImageBoard)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
+
+        private System.Windows.Forms.PictureBox ImageBoard;
     }
 }
