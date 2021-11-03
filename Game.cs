@@ -92,8 +92,6 @@ namespace Hopscotch
                 g.FillRectangle(sb, new Rectangle(prev_point.X, prev_point.Y, Constants.Player_Width, Constants.Player_Height));
                 //sb.Dispose();
 
-                MessageBox.Show("" + g.);
-
                 CheckBound();
             }
         }
@@ -101,7 +99,7 @@ namespace Hopscotch
         private void CheckBound()
         {
             ;
-            
+
         }
     }
 
