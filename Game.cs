@@ -14,68 +14,67 @@ namespace Hopscotch
     {
         private int player_x;
         private int player_y;
+        Button player;
         Graphics g;
+        Pen p;
+        Panel board;
 
         public Game()
         {
             InitializeComponent();
 
             this.Size = new Size(Constants.Form_Width, Constants.Form_Height);
-            ImageBoard.Size = new Size(Constants.Board_Width, Constants.Board_Height);
-            ImageBoard.SizeMode = PictureBoxSizeMode.StretchImage;
-            ImageBoard.Image = Image.FromFile(Constants.ImagePath);
+            //ImageBoard.Size = new Size(Constants.Board_Width, Constants.Board_Height);
+            //ImageBoard.SizeMode = PictureBoxSizeMode.StretchImage;
+            //ImageBoard.Image = Image.FromFile(Constants.ImagePath);
 
-            g = Graphics.FromImage((System.Drawing.Image)ImageBoard.Image);
-            DrawRec(0, 0, ImageBoard.Image.Width, ImageBoard.Height, Color.Gray);
+            //g = Graphics.FromImage((System.Drawing.Image)ImageBoard.Image);
+            //g.FillRectangle(new SolidBrush(Color.Gray), new Rectangle(0, 0, ImageBoard.Image.Width, ImageBoard.Image.Height));
 
-            Btn_Player.Size = new Size(Constants.Player_Width, Constants.Player_Height);
-            Btn_Player.BackColor = Btn_Player.ForeColor = Btn_Player.FlatAppearance.BorderColor = Color.Red;
-            player_x = ImageBoard.Location.X;
-            player_y = ImageBoard.Location.Y;
-            //PlayerMove();
+            g = this.CreateGraphics();
+            p = new Pen(Color.Red);
+            p.Width = Constants.Player_Width;
+
+            board = new Panel();
+            board.Size = new Size(Constants.Board_Width, Constants.Board_Height);
+            board.Location = new Point(0, 0);
+            board.BackColor = Color.Black;
+            this.Controls.Add(board);
+
+            player_x = 50;
+            player_y = 50;
+
+            player = new Button();
+            player.Size = new Size(Constants.Player_Width, Constants.Player_Height);
+            player.Location = new Point(player_x, player_y);
+            player.BackColor = Color.White;
+            player.FlatAppearance.BorderSize = 0;
+            player.FlatStyle = FlatStyle.Flat;
+            player.Enabled = false;
+            board.Controls.Add(player);
 
             KeyPreview = true;
             this.KeyDown += Key_Down;
 
             //g.Clear(Color.Red);
-
-            Play();
-        }
-
-        private void Play()
-        {
-            //PlayerMove();
-            Btn_Player.Location = new Point(10+player_x,10+player_y);
-            DrawRec(10, 10, 30, 30, Color.Blue);
-            //DrawRec(player_x - ImageBoard.Location.X, player_y - ImageBoard.Location.Y, Constants.Player_Width, Constants.Player_Height, Color.Blue);
-
-        }
-
-        private void DrawRec(int x, int y, int width, int height, Color c)
-        {
-            SolidBrush sb = new SolidBrush(c);
-            Rectangle rec = new Rectangle(x,y, width, height);
-
-            g.FillRectangle(sb, rec);
-            sb.Dispose();
-        }
-
-        private void PlayerMove()
-        {
-            Btn_Player.Location = new Point(player_x, player_y);
-            //DrawRec(player_x - ImageBoard.Location.X, player_y- ImageBoard.Location.Y, Constants.Player_Width, Constants.Player_Height, Color.Blue);
         }
 
         private void Key_Down(object sender, KeyEventArgs e)
         {
-            switch (e.KeyCode)
+            int prev_x = player_x, prev_y = player_y;
+
+            if (e.KeyCode == Keys.A || e.KeyCode == Keys.D || e.KeyCode == Keys.S || e.KeyCode == Keys.W)
             {
-                case Keys.A: --player_x; break;
-                case Keys.D: ++player_x; break;
-                case Keys.S: ++player_y; break;
-                case Keys.W: --player_y; break;
+                switch (e.KeyCode)
+                {
+                    case Keys.A: player_x-=5; break;
+                    case Keys.D: player_x+=5; break;
+                    case Keys.S: player_y+=5; break;
+                    case Keys.W: player_y-=5; break;
+                }
+                g.DrawLine(p, prev_x, prev_y, player_x, player_y);
+                player.Location = new Point(player_x, player_y);
             }
-            PlayerMove();
         }
     }
 
@@ -83,7 +82,7 @@ namespace Hopscotch
     {
         public const int Form_Width = 600, Form_Height = 500;
         public const int Board_Width = 570, Board_Height = 450;
-        public const int Player_Width = 30, Player_Height = 30;
-        public const string ImagePath = "./res/Image/Image1.jpg";
+        public const int Player_Width = 10, Player_Height = 10;
+        //public const string ImagePath = "./res/Image/Image1.jpg";
     }
 }
