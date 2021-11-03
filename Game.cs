@@ -16,7 +16,7 @@ namespace Hopscotch
         private int player_y;
         Button player;
         Graphics g;
-        Pen p;
+        SolidBrush sb;
         Panel board;
 
         public Game()
@@ -31,16 +31,6 @@ namespace Hopscotch
             //g = Graphics.FromImage((System.Drawing.Image)ImageBoard.Image);
             //g.FillRectangle(new SolidBrush(Color.Gray), new Rectangle(0, 0, ImageBoard.Image.Width, ImageBoard.Image.Height));
 
-            g = this.CreateGraphics();
-            p = new Pen(Color.Red);
-            p.Width = Constants.Player_Width;
-
-            board = new Panel();
-            board.Size = new Size(Constants.Board_Width, Constants.Board_Height);
-            board.Location = new Point(0, 0);
-            board.BackColor = Color.Black;
-            this.Controls.Add(board);
-
             player_x = 50;
             player_y = 50;
 
@@ -51,7 +41,16 @@ namespace Hopscotch
             player.FlatAppearance.BorderSize = 0;
             player.FlatStyle = FlatStyle.Flat;
             player.Enabled = false;
-            board.Controls.Add(player);
+            this.Controls.Add(player);
+
+            board = new Panel();
+            board.Size = new Size(Constants.Board_Width, Constants.Board_Height);
+            board.Location = new Point(0, 0);
+            board.BackColor = Color.Black;
+            this.Controls.Add(board);
+
+            g = board.CreateGraphics();
+            sb = new SolidBrush(Color.Red);
 
             KeyPreview = true;
             this.KeyDown += Key_Down;
@@ -61,6 +60,7 @@ namespace Hopscotch
 
         private void Key_Down(object sender, KeyEventArgs e)
         {
+            
             int prev_x = player_x, prev_y = player_y;
 
             if (e.KeyCode == Keys.A || e.KeyCode == Keys.D || e.KeyCode == Keys.S || e.KeyCode == Keys.W)
@@ -72,8 +72,9 @@ namespace Hopscotch
                     case Keys.S: player_y+=5; break;
                     case Keys.W: player_y-=5; break;
                 }
-                g.DrawLine(p, prev_x, prev_y, player_x, player_y);
                 player.Location = new Point(player_x, player_y);
+                g.FillRectangle(sb, new Rectangle(prev_x, prev_y, Constants.Player_Width, Constants.Player_Height));
+                //sb.Dispose();
             }
         }
     }
