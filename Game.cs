@@ -24,11 +24,13 @@ namespace Hopscotch
         {
             public Point start_point;
             public Point cur_point;
+            public int[,] board;
 
             public Player()
             {
                 start_point = new Point(0, 0);
                 cur_point = new Point(0,0);
+                board = new int[Constants.Board_Width / Constants.Player_Width, Constants.Board_Height / Constants.Player_Height];
             }  
         }
 
@@ -62,6 +64,8 @@ namespace Hopscotch
             btn_player.Enabled = false;
             this.Controls.Add(btn_player);
 
+            player.board[0, 0] = 1;
+
             board = new Panel();
             board.Size = new Size(Constants.Board_Width, Constants.Board_Height);
             board.Location = new Point(0, 0);
@@ -74,9 +78,6 @@ namespace Hopscotch
             KeyPreview = true;
             this.KeyDown += Key_Down;
 
-            var tmp = System.Windows.Forms.SystemInformation.CaptionHeight;
-            var tmp2 = System.Windows.Forms.SystemInformation.BorderSize;
-            MessageBox.Show("" + tmp + "," + tmp2);
             //g.Clear(Color.Red);
         }
 
@@ -93,34 +94,32 @@ namespace Hopscotch
                     case Keys.S: if (player.cur_point.Y + Constants.Player_Height < Constants.Board_Height) player.cur_point.Y += Constants.Player_Height; break;
                     case Keys.W: if (player.cur_point.Y > 0) player.cur_point.Y -= Constants.Player_Height; break;
                 }
-                //this.Location + "\n" + board.Location + "\n");
-                Bitmap bm = new Bitmap(1, 1);
-                Graphics gp = Graphics.FromImage(bm);
-                //var tmp = System.Windows.Forms.SystemInformation.CaptionHeight;
-                //MessageBox.Show("" + tmp);
-                gp.CopyFromScreen(20 + player.cur_point.X, 50 + player.cur_point.Y, 0,0, btn_player.Size);
-                //btn_player.Size);
-                MessageBox.Show("" + bm.GetPixel(0, 0));
-
-                //var tmp = System.Windows.Forms.SystemInformation.CaptionHeight;
-                //MessageBox.Show("" + tmp);
-
-                //int cx = Cursor.Position.X; // 7
-                //int cy = Cursor.Position.Y; // 32
-                //MessageBox.Show("" + cx + "," +cy);
-
-
                 btn_player.Location = player.cur_point;
                 g.FillRectangle(sb, new Rectangle(prev_point.X, prev_point.Y, Constants.Player_Width, Constants.Player_Height));
                 //sb.Dispose();
 
-                CheckBound();
+                CheckBound(e.KeyCode);
             }
         }
 
-        private void CheckBound()
+        private void CheckBound(Keys key)
         {
-            ;
+            bool check = true;
+            if (player.board[player.cur_point.X, player.cur_point.Y] == 1)
+            {
+                for (int i = player.start_point.X; i <= player.cur_point.X; i++)
+                    if (check)
+                    {
+                        for (int j = player.start_point.Y; j < player.cur_point.Y; j++)
+                            if (player.board[i, j] != 1)
+                            {
+                                check = false;
+                                break;
+                            }
+                    }
+            }
+            else
+                player.board[player.cur_point.X, player.cur_point.Y] = 1;
 
         }
     }
