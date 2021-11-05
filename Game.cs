@@ -82,14 +82,11 @@ namespace Hopscotch
             //g.Clear(Color.Red);
             
             btn = new Button[Constants.Board_Height / Constants.Player_Height, Constants.Board_Width / Constants.Player_Width];
-            BtnAdd();
+            BtnAdd(0,0);
         }
 
-        private void BtnAdd()
+        private void BtnAdd(int i, int j)
         {
-            int j = player.cur_point.X / Constants.Player_Width;
-            int i = player.cur_point.Y / Constants.Player_Height;
-
             btn[i, j] = new Button();
             btn[i, j].Location = player.cur_point;
             btn[i, j].Size = new Size(Constants.Player_Width, Constants.Player_Height);
@@ -123,17 +120,16 @@ namespace Hopscotch
         private void CheckBound(Keys key)
         {
             bool check = true;
-
-            player.board[player.cur_point.Y / Constants.Player_Height, player.cur_point.X / Constants.Player_Width] = 1;
-            BtnAdd();
-
-            if (player.board[player.cur_point.X, player.cur_point.Y] == 1)
+            int i = player.cur_point.Y / Constants.Player_Height;
+            int j = player.cur_point.X / Constants.Player_Width;
+            
+            if (player.board[i,j] == 1)
             {
-                for (int i = player.start_point.X; i <= player.cur_point.X; i++)
+                for (int k = i; k <= i; k++)
                     if (check)
                     {
-                        for (int j = player.start_point.Y; j < player.cur_point.Y; j++)
-                            if (player.board[i, j] != 1)
+                        for (int l = j; l < j; l++)
+                            if (player.board[k,l] != 1)
                             {
                                 check = false;
                                 break;
@@ -142,8 +138,8 @@ namespace Hopscotch
             }
             else
             {
-                player.board[player.cur_point.X, player.cur_point.Y] = 1;
-                BtnAdd();
+                player.board[i,j] = 1;
+                BtnAdd(i,j);
             }
         }
     }
