@@ -16,7 +16,7 @@ namespace Hopscotch
         {
             public const int Form_Width = 600, Form_Height = 500;
             public const int Board_Width = 500, Board_Height = 400;
-            public const int Player_Width = 10, Player_Height = 10;
+            public const int Player_Width = 20, Player_Height = 20;
             //public const string ImagePath = "./res/Image/Image1.jpg";
         }
 
@@ -30,7 +30,7 @@ namespace Hopscotch
             {
                 start_point = new Point(0, 0);
                 cur_point = new Point(0,0);
-                board = new int[Constants.Board_Width / Constants.Player_Width, Constants.Board_Height / Constants.Player_Height];
+                board = new int[Constants.Board_Height / Constants.Player_Height, Constants.Board_Width / Constants.Player_Width];
             }  
         }
 
@@ -39,6 +39,7 @@ namespace Hopscotch
         Graphics g;
         SolidBrush sb;
         Panel board;
+        Button[,] btn;
 
         public Game()
         {
@@ -79,6 +80,23 @@ namespace Hopscotch
             this.KeyDown += Key_Down;
 
             //g.Clear(Color.Red);
+            
+            btn = new Button[Constants.Board_Height / Constants.Player_Height, Constants.Board_Width / Constants.Player_Width];
+            BtnAdd();
+        }
+
+        private void BtnAdd()
+        {
+            int j = player.cur_point.X / Constants.Player_Width;
+            int i = player.cur_point.Y / Constants.Player_Height;
+
+            btn[i, j] = new Button();
+            btn[i, j].Location = player.cur_point;
+            btn[i, j].Size = new Size(Constants.Player_Width, Constants.Player_Height);
+            btn[i, j].BackColor = Color.Red;
+            btn[i, j].ForeColor = Color.Black;
+            btn[i, j].Text = player.board[i, j].ToString();
+            board.Controls.Add(btn[i,j]);
         }
 
         private void Key_Down(object sender, KeyEventArgs e)
@@ -105,6 +123,10 @@ namespace Hopscotch
         private void CheckBound(Keys key)
         {
             bool check = true;
+
+            player.board[player.cur_point.Y / Constants.Player_Height, player.cur_point.X / Constants.Player_Width] = 1;
+            BtnAdd();
+
             if (player.board[player.cur_point.X, player.cur_point.Y] == 1)
             {
                 for (int i = player.start_point.X; i <= player.cur_point.X; i++)
@@ -119,8 +141,10 @@ namespace Hopscotch
                     }
             }
             else
+            {
                 player.board[player.cur_point.X, player.cur_point.Y] = 1;
-
+                BtnAdd();
+            }
         }
     }
 
