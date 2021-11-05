@@ -22,14 +22,16 @@ namespace Hopscotch
 
         class Player
         {
-            public Point start_point;
-            public Point cur_point;
+            public Point start;
+            public Point end;
+            public Point pprev;
+            public Point prev;
+            public Point cur;
             public int[,] board;
 
             public Player()
             {
-                start_point = new Point(0, 0);
-                cur_point = new Point(0,0);
+                start = end = pprev = prev = cur = new Point(0, 0);
                 board = new int[Constants.Board_Height / Constants.Player_Height, Constants.Board_Width / Constants.Player_Width];
             }  
         }
@@ -58,7 +60,7 @@ namespace Hopscotch
 
             btn_player = new Button();
             btn_player.Size = new Size(Constants.Player_Width, Constants.Player_Height);
-            btn_player.Location = player.cur_point;
+            btn_player.Location = player.cur;
             btn_player.BackColor = Color.White;
             btn_player.FlatAppearance.BorderSize = 0;
             btn_player.FlatStyle = FlatStyle.Flat;
@@ -83,6 +85,7 @@ namespace Hopscotch
             
             btn = new Button[Constants.Board_Height / Constants.Player_Height, Constants.Board_Width / Constants.Player_Width];
             BtnAdd(0,0);
+
         }
 
         private void BtnAdd(int i, int j)
@@ -98,19 +101,21 @@ namespace Hopscotch
 
         private void Key_Down(object sender, KeyEventArgs e)
         {
-            Point prev_point = player.cur_point;
+            player.pprev = player.prev;
+            player.prev = player.cur;
+            //Point prev_point = player.cur;
 
             if (e.KeyCode == Keys.A || e.KeyCode == Keys.D || e.KeyCode == Keys.S || e.KeyCode == Keys.W)
             {
                 switch (e.KeyCode)
                 {
-                    case Keys.A: if (player.cur_point.X > 0) player.cur_point.X -= Constants.Player_Width; break;
-                    case Keys.D: if (player.cur_point.X + Constants.Player_Width < Constants.Board_Width) player.cur_point.X += Constants.Player_Width; break;
-                    case Keys.S: if (player.cur_point.Y + Constants.Player_Height < Constants.Board_Height) player.cur_point.Y += Constants.Player_Height; break;
-                    case Keys.W: if (player.cur_point.Y > 0) player.cur_point.Y -= Constants.Player_Height; break;
+                    case Keys.A: if (player.cur.X > 0) player.cur.X -= Constants.Player_Width; break;
+                    case Keys.D: if (player.cur.X + Constants.Player_Width < Constants.Board_Width) player.cur.X += Constants.Player_Width; break;
+                    case Keys.S: if (player.cur.Y + Constants.Player_Height < Constants.Board_Height) player.cur.Y += Constants.Player_Height; break;
+                    case Keys.W: if (player.cur.Y > 0) player.cur.Y -= Constants.Player_Height; break;
                 }
-                btn_player.Location = player.cur_point;
-                g.FillRectangle(sb, new Rectangle(prev_point.X, prev_point.Y, Constants.Player_Width, Constants.Player_Height));
+                btn_player.Location = player.cur;
+                g.FillRectangle(sb, new Rectangle(player.prev.X, player.prev.Y, Constants.Player_Width, Constants.Player_Height));
                 //sb.Dispose();
 
                 CheckBound(e.KeyCode);
@@ -119,27 +124,32 @@ namespace Hopscotch
 
         private void CheckBound(Keys key)
         {
-            bool check = true;
-            int i = player.cur_point.Y / Constants.Player_Height;
-            int j = player.cur_point.X / Constants.Player_Width;
-            
+            int start_x = player.start.X, start_y = player.start.Y;
+            int pprev_x = player.pprev.X, pprev_y = player.pprev.Y;
+            int prev_x = player.prev.X, prev_y = player.prev.Y;
+            int cur_x = player.cur.X, cur_y = player.cur.Y;
+            int i = cur_y / Constants.Player_Height, j = cur_x / Constants.Player_Width;
+
             if (player.board[i,j] == 1)
             {
-                for (int k = i; k <= i; k++)
-                    if (check)
-                    {
-                        for (int l = j; l < j; l++)
-                            if (player.board[k,l] != 1)
-                            {
-                                check = false;
-                                break;
-                            }
-                    }
+                ;
             }
             else
             {
                 player.board[i,j] = 1;
                 BtnAdd(i,j);
+
+                if (start_x != cur_x && start_y != cur_y)
+                {
+                    player.end = player.cur;
+                    //create tmp block
+                }
+                else if(cur_x != start_x && pprev_x !=  cur_x)
+                {
+                    player.start = player.prev;
+                }
+                else if()
+
             }
         }
     }
