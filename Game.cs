@@ -16,8 +16,10 @@ namespace Hopscotch
         {
             public const int Form_Width = 600, Form_Height = 500;
             public const int Board_Width = 500, Board_Height = 400;
-            public const int Player_Width = 20, Player_Height = 20;
+            public const int Player_Width = 10, Player_Height = 10;
             //public const string ImagePath = "./res/Image/Image1.jpg";
+
+            public const int itmp = -1;
         }
 
         class Player
@@ -84,18 +86,23 @@ namespace Hopscotch
             //g.Clear(Color.Red);
             
             btn = new Button[Constants.Board_Height / Constants.Player_Height, Constants.Board_Width / Constants.Player_Width];
-            BtnAdd(0,0);
+            BtnAdd(0,0, 1);
 
         }
 
-        private void BtnAdd(int i, int j)
+        private void BtnAdd(int i, int j, int val)
         {
             btn[i, j] = new Button();
-            btn[i, j].Location = player.cur_point;
+            btn[i, j].Location = new Point(j*Constants.Player_Width, i*Constants.Player_Height);
             btn[i, j].Size = new Size(Constants.Player_Width, Constants.Player_Height);
-            btn[i, j].BackColor = Color.Red;
+            btn[i, j].FlatStyle = FlatStyle.Flat;
+            btn[i, j].FlatAppearance.BorderSize = 0;
+            btn[i, j].Text = val.ToString();
+            if (val == 1)
+                btn[i, j].BackColor = Color.Red;
+            else if (val == Constants.itmp)
+                btn[i, j].BackColor = Color.Gray;
             btn[i, j].ForeColor = Color.Black;
-            btn[i, j].Text = player.board[i, j].ToString();
             board.Controls.Add(btn[i,j]);
         }
 
@@ -103,7 +110,6 @@ namespace Hopscotch
         {
             player.pprev = player.prev;
             player.prev = player.cur;
-            //Point prev_point = player.cur;
 
             if (e.KeyCode == Keys.A || e.KeyCode == Keys.D || e.KeyCode == Keys.S || e.KeyCode == Keys.W)
             {
@@ -130,26 +136,40 @@ namespace Hopscotch
             int cur_x = player.cur.X, cur_y = player.cur.Y;
             int i = cur_y / Constants.Player_Height, j = cur_x / Constants.Player_Width;
 
-            if (player.board[i,j] == 1)
+            if (player.board[i,j] == 1 && player.cur.Equals(player.pprev))
             {
-                ;
+                MessageBox.Show("dd");
             }
             else
             {
-                player.board[i,j] = 1;
-                BtnAdd(i,j);
-
-                if (start_x != cur_x && start_y != cur_y)
+                player.board[i, j] = 1;
+                if(btn[i,j] == null)
+                    BtnAdd(i, j, 1);
+                else if (btn[i,j].Text == Constants.itmp.ToString())
                 {
-                    player.end = player.cur;
-                    //create tmp block
+                    btn[i, j].Text = 1.ToString();
+                    btn[i, j].BackColor = Color.Red;
                 }
-                else if(cur_x != start_x && pprev_x !=  cur_x)
-                {
-                    player.start = player.prev;
-                }
-                else if()
 
+                if (pprev_x != cur_x && pprev_y != cur_y) // 꺾였을 때
+                {
+                    if (start_y != prev_y)
+                    {
+                        player.end = player.prev;
+                        if ((start_x < player.end.X && start_y < player.end.Y) || (start_x > player.end.X && start_y > player.end.Y))
+                        {
+                            for (int k = Math.Min(start_y, player.end.Y) / Constants.Player_Height; k <= Math.Max(start_y, player.end.Y) / Constants.Player_Height; k++)
+                                for (int l = Math.Min(start_x, player.end.X) / Constants.Player_Width; l <= Math.Max(start_x, player.end.X) / Constants.Player_Width; l++)
+                                {
+                                    if (btn[k, l] == null)
+                                    {
+                                        BtnAdd(k, l, Constants.itmp);
+                                    }
+                                }
+                        }
+                        player.start = player.prev;
+                    }
+                }
             }
         }
     }
