@@ -63,13 +63,13 @@ namespace Hopscotch
                 arr_board = new int[Constants.Board_Height, Constants.Board_Width];
             }
 
-            public void DrawLine(Point point)
+            public void DrawLine(Point p)
             {
-                arr_board[point.Y, point.X] = 1;
-                g.FillRectangle(sb, new Rectangle(point.X, point.Y, Constants.Player_Width, Constants.Player_Height));
+                arr_board[p.Y, p.X] = 1;
+                g.FillRectangle(sb, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
             }
 
-            public void DrawBoard()
+            public void DrawArea(Point p1, Point p2)
             {
 
             }
@@ -107,24 +107,6 @@ namespace Hopscotch
             //g.Clear(Color.Red);
         }
 
-        /*
-        private void BtnAdd(int i, int j, int val)
-        {
-            btn[i, j] = new Button();
-            btn[i, j].Location = new Point(j*Constants.Player_Width, i*Constants.Player_Height);
-            btn[i, j].Size = new Size(Constants.Player_Width, Constants.Player_Height);
-            btn[i, j].FlatStyle = FlatStyle.Flat;
-            btn[i, j].FlatAppearance.BorderSize = 0;
-            btn[i, j].Text = val.ToString();
-            if (val == 1)
-                btn[i, j].BackColor = Color.Red;
-            else if (val == Constants.itmp)
-                btn[i, j].BackColor = Color.Gray;
-            btn[i, j].ForeColor = Color.Black;
-            board.Controls.Add(btn[i,j]);
-        }
-        */
-
         private void Key_Down(object sender, KeyEventArgs e)
         {
             player.prev = player.cur;
@@ -146,7 +128,13 @@ namespace Hopscotch
                 else if (board.arr_board[player.prev.Y, player.prev.X] != Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] == Constants.MyArea)
                 {
                     player.end = player.cur;
-                    board.DrawBoard();
+                    if (player.start.Y > player.end.Y) // Swap to get player.start small y value
+                    {
+                        Point tmp = player.start;
+                        player.start = player.end;
+                        player.end = tmp;
+                    }
+                    board.DrawArea(player.start, player.end);
                 }
             }
         }
