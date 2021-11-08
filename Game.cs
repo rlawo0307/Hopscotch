@@ -19,18 +19,16 @@ namespace Hopscotch
             public const int Player_Width = 10, Player_Height = 10;
             //public const string ImagePath = "./res/Image/Image1.jpg";
 
-            public const int itmp = -1;
+            public const int MyArea = 2;
         }
 
         class Player
         {
             public Button bp;
-            //public Point start;
-            //public Point end;
-            //public Point pprev;
-            //public Point prev;
+            public Point start;
+            public Point end;
+            public Point prev;
             public Point cur;
-            //public int[,] board;
 
             public Player()
             {
@@ -42,9 +40,7 @@ namespace Hopscotch
                 bp.FlatStyle = FlatStyle.Flat;
                 bp.Enabled = false;
 
-                //start = end = pprev = prev = cur = new Point(0, 0);
-                //board = new int[Constants.Board_Height / Constants.Player_Height, Constants.Board_Width / Constants.Player_Width];
-            }  
+                cur = new Point(0, 0);}  
         }
 
         class Board
@@ -52,7 +48,6 @@ namespace Hopscotch
             public Panel panel_board;
             Graphics g;
             SolidBrush sb;
-
             public int[,] arr_board;
 
             public Board()
@@ -62,15 +57,16 @@ namespace Hopscotch
                 panel_board.Location = new Point(0, 0);
                 panel_board.BackColor = Color.Black;
 
-                //g = board.CreateGraphics();
                 g = panel_board.CreateGraphics();
                 sb = new SolidBrush(Color.Red);
 
+                arr_board = new int[Constants.Board_Height, Constants.Board_Width];
             }
 
-            public void CreateBoard()
+            public void DrawLine(Point point)
             {
-
+                arr_board[point.Y, point.X] = 1;
+                g.FillRectangle(sb, new Rectangle(point.X, point.Y, Constants.Player_Width, Constants.Player_Height));
             }
 
             public void DrawBoard()
@@ -81,11 +77,6 @@ namespace Hopscotch
 
         Player player;
         Board board;
-        //Button btn_player;
-        //Graphics g;
-        //SolidBrush sb;
-        //Panel board;
-        //Button[,] btn;
 
         public Game()
         {
@@ -108,18 +99,15 @@ namespace Hopscotch
 
             for (int i = 0; i < 2; i++)
                 for (int j = 0; j < 2; j++)
-                    board.arr_board[i, j] = 2; // area
+                    board.arr_board[i, j] = Constants.MyArea; // area
 
             KeyPreview = true;
             this.KeyDown += Key_Down;
 
             //g.Clear(Color.Red);
-            
-            //btn = new Button[Constants.Board_Height / Constants.Player_Height, Constants.Board_Width / Constants.Player_Width];
-            //BtnAdd(0,0, 1);
-
         }
 
+        /*
         private void BtnAdd(int i, int j, int val)
         {
             btn[i, j] = new Button();
@@ -135,11 +123,11 @@ namespace Hopscotch
             btn[i, j].ForeColor = Color.Black;
             board.Controls.Add(btn[i,j]);
         }
+        */
 
         private void Key_Down(object sender, KeyEventArgs e)
         {
-            //player.pprev = player.prev;
-            //player.prev = player.cur;
+            player.prev = player.cur;
 
             if (e.KeyCode == Keys.A || e.KeyCode == Keys.D || e.KeyCode == Keys.S || e.KeyCode == Keys.W)
             {
@@ -151,59 +139,16 @@ namespace Hopscotch
                     case Keys.W: if (player.cur.Y > 0) player.cur.Y -= Constants.Player_Height; break;
                 }
                 player.bp.Location = player.cur;
+                board.DrawLine(player.prev);
 
-                //g.FillRectangle(sb, new Rectangle(player.prev.X, player.prev.Y, Constants.Player_Width, Constants.Player_Height));
-                //sb.Dispose();
-
-                CheckBound(e.KeyCode);
-            }
-        }
-
-        private void CheckBound(Keys key)
-        {
-            //int start_x = player.start.X, start_y = player.start.Y;
-            //int pprev_x = player.pprev.X, pprev_y = player.pprev.Y;
-            //int prev_x = player.prev.X, prev_y = player.prev.Y;
-            int cur_x = player.cur.X, cur_y = player.cur.Y;
-            int i = cur_y / Constants.Player_Height, j = cur_x / Constants.Player_Width;
-
-            if (player.board[i,j] == 1 && player.cur.Equals(player.pprev))
-            {
-                MessageBox.Show("dd");
-            }
-            else
-            {
-                player.board[i, j] = 1;
-                if(btn[i,j] == null)
-                    BtnAdd(i, j, 1);
-                else if (btn[i,j].Text == Constants.itmp.ToString())
+                if (board.arr_board[player.prev.Y, player.prev.X] == Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] != Constants.MyArea)
+                    player.start = player.prev;
+                else if (board.arr_board[player.prev.Y, player.prev.X] != Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] == Constants.MyArea)
                 {
-                    btn[i, j].Text = 1.ToString();
-                    btn[i, j].BackColor = Color.Red;
-                }
-
-                if (pprev_x != cur_x && pprev_y != cur_y) // 꺾였을 때
-                {
-                    if (start_y != prev_y)
-                    {
-                        player.end = player.prev;
-                        if ((start_x < player.end.X && start_y < player.end.Y) || (start_x > player.end.X && start_y > player.end.Y))
-                        {
-                            for (int k = Math.Min(start_y, player.end.Y) / Constants.Player_Height; k <= Math.Max(start_y, player.end.Y) / Constants.Player_Height; k++)
-                                for (int l = Math.Min(start_x, player.end.X) / Constants.Player_Width; l <= Math.Max(start_x, player.end.X) / Constants.Player_Width; l++)
-                                {
-                                    if (btn[k, l] == null)
-                                    {
-                                        BtnAdd(k, l, Constants.itmp);
-                                    }
-                                }
-                        }
-                        player.start = player.prev;
-                    }
+                    player.end = player.cur;
+                    board.DrawBoard();
                 }
             }
         }
-    }
-
-    
+    }  
 }
