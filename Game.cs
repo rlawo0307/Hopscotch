@@ -41,7 +41,7 @@ namespace Hopscotch
                 bp.FlatStyle = FlatStyle.Flat;
                 bp.Enabled = false;
 
-                cur = new Point(0, 0);
+                cur = new Point(30, 30);
             }  
         }
 
@@ -67,29 +67,21 @@ namespace Hopscotch
 
             public void DrawLine(Point p)
             {
-                if (arr_board[p.Y, p.X] == Constants.Empty)
+                if(arr_board[p.Y, p.X] == Constants.Empty)
                     arr_board[p.Y, p.X] = Constants.Mypath;
                 g.FillRectangle(sb, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
             }
 
             public void DrawArea(Point p)
             {
-                //SolidBrush tmp= new SolidBrush(Color.Blue);
-                //g.FillRectangle(tmp, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
-                /*
-                int i = p.Y, j = p.X;
+                SolidBrush tmp= new SolidBrush(Color.Yellow);
+                g.FillRectangle(tmp, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
 
-                if (arr_board[i,j] == Constants.MyArea)
-                    return;
-                else if(arr_board[i,j] == Constants.Mypath)
+                int i = p.X;
+                while(arr_board[p.Y, i] != Constants.Mypath)
                 {
-                    arr_board[i, j] = Constants.MyArea;
-                    DrawArea(new Point(p.Y - 1, p.X));
-                    DrawArea(new Point(p.Y + 1, p.X));
-                    DrawArea(new Point(p.Y, p.X - 1));
-                    DrawArea(new Point(p.Y, p.X + 1));
+
                 }
-                */
             }
 
         }
@@ -104,11 +96,6 @@ namespace Hopscotch
             this.Size = new Size(Constants.Form_Width, Constants.Form_Height);
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(0, 0);
-            //ImageBoard.Size = new Size(Constants.Board_Width, Constants.Board_Height);
-            //ImageBoard.SizeMode = PictureBoxSizeMode.StretchImage;
-            //ImageBoard.Image = Image.FromFile(Constants.ImagePath);
-            //g = Graphics.FromImage((System.Drawing.Image)ImageBoard.Image);
-            //g.FillRectangle(new SolidBrush(Color.Gray), new Rectangle(0, 0, ImageBoard.Image.Width, ImageBoard.Image.Height));
 
             player = new Player();
             this.Controls.Add(player.bp);
@@ -116,7 +103,7 @@ namespace Hopscotch
             board = new Board();
             this.Controls.Add(board.panel_board);
 
-            board.arr_board[0, 0] = Constants.MyArea;
+            board.arr_board[player.cur.Y, player.cur.X] = Constants.MyArea;
 
             KeyPreview = true;
             this.KeyDown += Key_Down;
@@ -130,28 +117,26 @@ namespace Hopscotch
             {
                 switch (e.KeyCode)
                 {
-                    case Keys.A:
+                    case Keys.A: if (player.cur.X > 0) player.cur.X -= Constants.Player_Width; break;
+                    case Keys.D: if (player.cur.X + Constants.Player_Width < Constants.Board_Width) player.cur.X += Constants.Player_Width; break;
+                    case Keys.S: if (player.cur.Y + Constants.Player_Height < Constants.Board_Height) player.cur.Y += Constants.Player_Height; break;
+                    case Keys.W:
                         {
-                            if (player.cur.X > 0)
-                                player.cur.X -= Constants.Player_Width;
-                            if (player.start != null && player.cur.Y > player.start.Y)
+                            if (player.cur.Y > 0)
+                                player.cur.Y -= Constants.Player_Height;
+                            if (player.cur.Y < player.start.Y)
                                 player.start = player.cur;
                             break;
                         }
-                    case Keys.D: if (player.cur.X + Constants.Player_Width < Constants.Board_Width) player.cur.X += Constants.Player_Width; break;
-                    case Keys.S: if (player.cur.Y + Constants.Player_Height < Constants.Board_Height) player.cur.Y += Constants.Player_Height; break;
-                    case Keys.W: if (player.cur.Y > 0) player.cur.Y -= Constants.Player_Height; break;
                 }
                 player.bp.Location = player.cur;
                 board.DrawLine(player.prev);
 
                 if (board.arr_board[player.prev.Y, player.prev.X] == Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] != Constants.MyArea)
-                    player.start = player.cur;
+                    player.start = player.prev;
 
                 if (board.arr_board[player.prev.Y, player.prev.X] != Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] == Constants.MyArea)
-                {
                     board.DrawArea(player.start);
-                }
             }
         }
     }  
