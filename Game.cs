@@ -41,7 +41,7 @@ namespace Hopscotch
                 bp.FlatStyle = FlatStyle.Flat;
                 bp.Enabled = false;
 
-                cur = new Point(30, 30);
+                cur = new Point(60, 60);
             }  
         }
 
@@ -72,16 +72,27 @@ namespace Hopscotch
                 g.FillRectangle(sb, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
             }
 
-            public void DrawArea(Point p)
+            public void DrawArea(int i,int j, int direc)
             {
-                SolidBrush tmp= new SolidBrush(Color.Yellow);
-                g.FillRectangle(tmp, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
+                if (i < 0 || i > Constants.Board_Height || j < 0 || j > Constants.Board_Width)
+                    return;
+                if (arr_board[i, j] != Constants.Mypath)
+                    return;
+                
+                arr_board[i, j] = Constants.MyArea;
 
-                int i = p.X;
-                while(arr_board[p.Y, i] != Constants.Mypath)
+                int jj = j + Constants.Player_Width * direc;
+                while (arr_board[i, jj] != Constants.Mypath)
                 {
-
+                    arr_board[i, jj] = Constants.MyArea;
+                    g.FillRectangle(sb, new Rectangle(jj, i, Constants.Player_Width, Constants.Player_Height));
+                    jj += Constants.Player_Width * direc;
                 }
+
+                DrawArea(i - Constants.Player_Height, j, direc * -1);
+                DrawArea(i + Constants.Player_Height, j, direc);
+                DrawArea(i, j - Constants.Player_Width, direc);
+                DrawArea(i, j + Constants.Player_Width, direc);
             }
 
         }
@@ -111,10 +122,10 @@ namespace Hopscotch
 
         private void Key_Down(object sender, KeyEventArgs e)
         {
-            player.prev = player.cur;
-
             if (e.KeyCode == Keys.A || e.KeyCode == Keys.D || e.KeyCode == Keys.S || e.KeyCode == Keys.W)
             {
+                player.prev = player.cur;
+
                 switch (e.KeyCode)
                 {
                     case Keys.A: if (player.cur.X > 0) player.cur.X -= Constants.Player_Width; break;
@@ -131,12 +142,18 @@ namespace Hopscotch
                 }
                 player.bp.Location = player.cur;
                 board.DrawLine(player.prev);
+                //MessageBox.Show("[" + player.prev.Y + " , "+  player.prev.X + "]" + board.arr_board[player.prev.Y, player.prev.X]);
+                //0, 0] + " " + board.arr_board[1, 0]);
 
                 if (board.arr_board[player.prev.Y, player.prev.X] == Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] != Constants.MyArea)
                     player.start = player.prev;
 
                 if (board.arr_board[player.prev.Y, player.prev.X] != Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] == Constants.MyArea)
-                    board.DrawArea(player.start);
+                {
+                    board.DrawArea(player.start.Y, player.start.X, 1);
+                    //MessageBox.Show("" + board.arr_board[0, 0] + " " + board.arr_board[1, 0]);
+                    //new Point(player.start.X, player.start.Y), 1);
+                }
             }
         }
     }  
