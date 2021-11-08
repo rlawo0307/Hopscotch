@@ -19,14 +19,15 @@ namespace Hopscotch
             public const int Player_Width = 10, Player_Height = 10;
             //public const string ImagePath = "./res/Image/Image1.jpg";
 
+            public const int Mypath = 1;
             public const int MyArea = 2;
         }
 
         class Player
         {
             public Button bp;
-            public Point start;
-            public Point end;
+            //public Point start;
+            //public Point end;
             public Point prev;
             public Point cur;
 
@@ -65,13 +66,24 @@ namespace Hopscotch
 
             public void DrawLine(Point p)
             {
-                arr_board[p.Y, p.X] = 1;
+                arr_board[p.Y, p.X] = Constants.Mypath;
                 g.FillRectangle(sb, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
             }
 
-            public void DrawArea(Point p1, Point p2)
+            public void DrawArea(Point p)
             {
+                int i = p.Y, j = p.X;
 
+                if (arr_board[i,j] == Constants.MyArea)
+                    return;
+                else if(arr_board[i,j] == Constants.Mypath)
+                {
+                    arr_board[i, j] = Constants.MyArea;
+                    DrawArea(new Point(p.Y - 1, p.X));
+                    DrawArea(new Point(p.Y + 1, p.X));
+                    DrawArea(new Point(p.Y, p.X - 1));
+                    DrawArea(new Point(p.Y, p.X + 1));
+                }
             }
         }
 
@@ -123,18 +135,14 @@ namespace Hopscotch
                 player.bp.Location = player.cur;
                 board.DrawLine(player.prev);
 
+                /*
                 if (board.arr_board[player.prev.Y, player.prev.X] == Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] != Constants.MyArea)
                     player.start = player.prev;
-                else if (board.arr_board[player.prev.Y, player.prev.X] != Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] == Constants.MyArea)
+                */
+                if (board.arr_board[player.prev.Y, player.prev.X] != Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] == Constants.MyArea)
                 {
-                    player.end = player.cur;
-                    if (player.start.Y > player.end.Y) // Swap to get player.start small y value
-                    {
-                        Point tmp = player.start;
-                        player.start = player.end;
-                        player.end = tmp;
-                    }
-                    board.DrawArea(player.start, player.end);
+                    //player.end = player.cur;
+                    board.DrawArea(player.cur);
                 }
             }
         }
