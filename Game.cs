@@ -24,26 +24,68 @@ namespace Hopscotch
 
         class Player
         {
-            public Point start;
-            public Point end;
-            public Point pprev;
-            public Point prev;
+            public Button bp;
+            //public Point start;
+            //public Point end;
+            //public Point pprev;
+            //public Point prev;
             public Point cur;
-            public int[,] board;
+            //public int[,] board;
 
             public Player()
             {
-                start = end = pprev = prev = cur = new Point(0, 0);
-                board = new int[Constants.Board_Height / Constants.Player_Height, Constants.Board_Width / Constants.Player_Width];
+                bp = new Button();
+                bp.Size = new Size(Constants.Player_Width, Constants.Player_Height);
+                bp.Location = cur;
+                bp.BackColor = Color.White;
+                bp.FlatAppearance.BorderSize = 0;
+                bp.FlatStyle = FlatStyle.Flat;
+                bp.Enabled = false;
+
+                //start = end = pprev = prev = cur = new Point(0, 0);
+                //board = new int[Constants.Board_Height / Constants.Player_Height, Constants.Board_Width / Constants.Player_Width];
             }  
         }
 
+        class Board
+        {
+            public Panel panel_board;
+            Graphics g;
+            SolidBrush sb;
+
+            public int[,] arr_board;
+
+            public Board()
+            {
+                panel_board = new Panel();
+                panel_board.Size = new Size(Constants.Board_Width, Constants.Board_Height);
+                panel_board.Location = new Point(0, 0);
+                panel_board.BackColor = Color.Black;
+
+                //g = board.CreateGraphics();
+                g = panel_board.CreateGraphics();
+                sb = new SolidBrush(Color.Red);
+
+            }
+
+            public void CreateBoard()
+            {
+
+            }
+
+            public void DrawBoard()
+            {
+
+            }
+        }
+
         Player player;
-        Button btn_player;
-        Graphics g;
-        SolidBrush sb;
-        Panel board;
-        Button[,] btn;
+        Board board;
+        //Button btn_player;
+        //Graphics g;
+        //SolidBrush sb;
+        //Panel board;
+        //Button[,] btn;
 
         public Game()
         {
@@ -59,34 +101,22 @@ namespace Hopscotch
             //g.FillRectangle(new SolidBrush(Color.Gray), new Rectangle(0, 0, ImageBoard.Image.Width, ImageBoard.Image.Height));
 
             player = new Player();
+            this.Controls.Add(player.bp);
 
-            btn_player = new Button();
-            btn_player.Size = new Size(Constants.Player_Width, Constants.Player_Height);
-            btn_player.Location = player.cur;
-            btn_player.BackColor = Color.White;
-            btn_player.FlatAppearance.BorderSize = 0;
-            btn_player.FlatStyle = FlatStyle.Flat;
-            btn_player.Enabled = false;
-            this.Controls.Add(btn_player);
+            board = new Board();
+            this.Controls.Add(board.panel_board);
 
-            player.board[0, 0] = 1;
-
-            board = new Panel();
-            board.Size = new Size(Constants.Board_Width, Constants.Board_Height);
-            board.Location = new Point(0, 0);
-            board.BackColor = Color.Black;
-            this.Controls.Add(board);
-
-            g = board.CreateGraphics();
-            sb = new SolidBrush(Color.Red);
+            for (int i = 0; i < 2; i++)
+                for (int j = 0; j < 2; j++)
+                    board.arr_board[i, j] = 2; // area
 
             KeyPreview = true;
             this.KeyDown += Key_Down;
 
             //g.Clear(Color.Red);
             
-            btn = new Button[Constants.Board_Height / Constants.Player_Height, Constants.Board_Width / Constants.Player_Width];
-            BtnAdd(0,0, 1);
+            //btn = new Button[Constants.Board_Height / Constants.Player_Height, Constants.Board_Width / Constants.Player_Width];
+            //BtnAdd(0,0, 1);
 
         }
 
@@ -108,8 +138,8 @@ namespace Hopscotch
 
         private void Key_Down(object sender, KeyEventArgs e)
         {
-            player.pprev = player.prev;
-            player.prev = player.cur;
+            //player.pprev = player.prev;
+            //player.prev = player.cur;
 
             if (e.KeyCode == Keys.A || e.KeyCode == Keys.D || e.KeyCode == Keys.S || e.KeyCode == Keys.W)
             {
@@ -120,8 +150,9 @@ namespace Hopscotch
                     case Keys.S: if (player.cur.Y + Constants.Player_Height < Constants.Board_Height) player.cur.Y += Constants.Player_Height; break;
                     case Keys.W: if (player.cur.Y > 0) player.cur.Y -= Constants.Player_Height; break;
                 }
-                btn_player.Location = player.cur;
-                g.FillRectangle(sb, new Rectangle(player.prev.X, player.prev.Y, Constants.Player_Width, Constants.Player_Height));
+                player.bp.Location = player.cur;
+
+                //g.FillRectangle(sb, new Rectangle(player.prev.X, player.prev.Y, Constants.Player_Width, Constants.Player_Height));
                 //sb.Dispose();
 
                 CheckBound(e.KeyCode);
@@ -130,9 +161,9 @@ namespace Hopscotch
 
         private void CheckBound(Keys key)
         {
-            int start_x = player.start.X, start_y = player.start.Y;
-            int pprev_x = player.pprev.X, pprev_y = player.pprev.Y;
-            int prev_x = player.prev.X, prev_y = player.prev.Y;
+            //int start_x = player.start.X, start_y = player.start.Y;
+            //int pprev_x = player.pprev.X, pprev_y = player.pprev.Y;
+            //int prev_x = player.prev.X, prev_y = player.prev.Y;
             int cur_x = player.cur.X, cur_y = player.cur.Y;
             int i = cur_y / Constants.Player_Height, j = cur_x / Constants.Player_Width;
 
