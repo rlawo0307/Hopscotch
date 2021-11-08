@@ -19,6 +19,7 @@ namespace Hopscotch
             public const int Player_Width = 10, Player_Height = 10;
             //public const string ImagePath = "./res/Image/Image1.jpg";
 
+            public const int Empty = 0;
             public const int Mypath = 1;
             public const int MyArea = 2;
         }
@@ -26,10 +27,9 @@ namespace Hopscotch
         class Player
         {
             public Button bp;
-            //public Point start;
-            //public Point end;
             public Point prev;
             public Point cur;
+            public Point start;
 
             public Player()
             {
@@ -41,7 +41,8 @@ namespace Hopscotch
                 bp.FlatStyle = FlatStyle.Flat;
                 bp.Enabled = false;
 
-                cur = new Point(0, 0);}  
+                cur = new Point(0, 0);
+            }  
         }
 
         class Board
@@ -66,12 +67,16 @@ namespace Hopscotch
 
             public void DrawLine(Point p)
             {
-                arr_board[p.Y, p.X] = Constants.Mypath;
+                if (arr_board[p.Y, p.X] == Constants.Empty)
+                    arr_board[p.Y, p.X] = Constants.Mypath;
                 g.FillRectangle(sb, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
             }
 
             public void DrawArea(Point p)
             {
+                //SolidBrush tmp= new SolidBrush(Color.Blue);
+                //g.FillRectangle(tmp, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
+                /*
                 int i = p.Y, j = p.X;
 
                 if (arr_board[i,j] == Constants.MyArea)
@@ -84,7 +89,9 @@ namespace Hopscotch
                     DrawArea(new Point(p.Y, p.X - 1));
                     DrawArea(new Point(p.Y, p.X + 1));
                 }
+                */
             }
+
         }
 
         Player player;
@@ -109,14 +116,10 @@ namespace Hopscotch
             board = new Board();
             this.Controls.Add(board.panel_board);
 
-            for (int i = 0; i < 2; i++)
-                for (int j = 0; j < 2; j++)
-                    board.arr_board[i, j] = Constants.MyArea; // area
+            board.arr_board[0, 0] = Constants.MyArea;
 
             KeyPreview = true;
             this.KeyDown += Key_Down;
-
-            //g.Clear(Color.Red);
         }
 
         private void Key_Down(object sender, KeyEventArgs e)
@@ -127,7 +130,14 @@ namespace Hopscotch
             {
                 switch (e.KeyCode)
                 {
-                    case Keys.A: if (player.cur.X > 0) player.cur.X -= Constants.Player_Width; break;
+                    case Keys.A:
+                        {
+                            if (player.cur.X > 0)
+                                player.cur.X -= Constants.Player_Width;
+                            if (player.start != null && player.cur.Y > player.start.Y)
+                                player.start = player.cur;
+                            break;
+                        }
                     case Keys.D: if (player.cur.X + Constants.Player_Width < Constants.Board_Width) player.cur.X += Constants.Player_Width; break;
                     case Keys.S: if (player.cur.Y + Constants.Player_Height < Constants.Board_Height) player.cur.Y += Constants.Player_Height; break;
                     case Keys.W: if (player.cur.Y > 0) player.cur.Y -= Constants.Player_Height; break;
@@ -135,14 +145,12 @@ namespace Hopscotch
                 player.bp.Location = player.cur;
                 board.DrawLine(player.prev);
 
-                /*
                 if (board.arr_board[player.prev.Y, player.prev.X] == Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] != Constants.MyArea)
-                    player.start = player.prev;
-                */
+                    player.start = player.cur;
+
                 if (board.arr_board[player.prev.Y, player.prev.X] != Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] == Constants.MyArea)
                 {
-                    //player.end = player.cur;
-                    board.DrawArea(player.cur);
+                    board.DrawArea(player.start);
                 }
             }
         }
