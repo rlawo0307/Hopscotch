@@ -22,6 +22,7 @@ namespace Hopscotch
             public const int Empty = 0;
             public const int Mypath = 1;
             public const int MyArea = 2;
+            public const int Vertex = 3;
         }
 
         class Player
@@ -78,13 +79,13 @@ namespace Hopscotch
                 g.FillRectangle(tmp, new Rectangle(j, i, Constants.Player_Width, Constants.Player_Height));
             }
 
-            public void DrawArea(int i,int j, int direc)
+            public void DrawArea(int i,int j, int direc, int val)
             {
                 if (i < 0 || i > Constants.Board_Height || j < 0 || j > Constants.Board_Width)
                     return;
 
-                if (arr_board[i, j] != Constants.Empty)
-                    arr_board[i, j] = Constants.MyArea;
+                if (arr_board[i, j] == Constants.Mypath)
+                    arr_board[i, j] = val;
                 else
                     return;
 
@@ -94,29 +95,17 @@ namespace Hopscotch
                 if (arr_board[i + Constants.Player_Height, j] == Constants.Mypath)
                 {
                     FillArea(i, j, direc);
-                    DrawArea(i + Constants.Player_Height, j, direc);
+                    DrawArea(i + Constants.Player_Height, j, direc, Constants.MyArea);
                 }
                 if (arr_board[i - Constants.Player_Height, j] == Constants.Mypath)
                 {
+                    if (arr_board[i, j] == Constants.Vertex)
+                        direc *= -1;
                     FillArea(i, j, direc);
-                    DrawArea(i - Constants.Player_Height, j, direc);
+                    DrawArea(i - Constants.Player_Height, j, direc, Constants.MyArea);
                 }
-                if (arr_board[i, j-Constants.Player_Width] == Constants.Mypath)
-                {
-                    if (arr_board[i, j+Constants.Player_Width] == Constants.Empty)
-                        DrawArea(i, j - Constants.Player_Width, direc * -1);
-                    else
-                        DrawArea(i, j - Constants.Player_Width, direc);
-                }
-                if (arr_board[i, j + Constants.Player_Width] == Constants.Mypath)
-                {
-                    if (arr_board[i, j - Constants.Player_Width] == Constants.Empty)
-                        DrawArea(i, j + Constants.Player_Width, direc * -1);
-                    else
-                        DrawArea(i, j + Constants.Player_Width, direc);
-
-
-                }
+                DrawArea(i, j - Constants.Player_Width, direc, Constants.MyArea);
+                DrawArea(i, j + Constants.Player_Width, direc, Constants.MyArea);
             }
 
             public void FillArea(int i, int x, int direc)
@@ -166,7 +155,8 @@ namespace Hopscotch
                     case Keys.A: if (player.cur.X > 0) player.cur.X -= Constants.Player_Width; break;
                     case Keys.D: if (player.cur.X + Constants.Player_Width < Constants.Board_Width) player.cur.X += Constants.Player_Width; break;
                     case Keys.S: if (player.cur.Y + Constants.Player_Height < Constants.Board_Height) player.cur.Y += Constants.Player_Height; break;
-                    case Keys.W:
+                    case Keys.W: if (player.cur.Y - Constants.Player_Height > 0) player.cur.Y -= Constants.Player_Height; break;
+                        /*
                         {
                             if (player.cur.Y > 0)
                                 player.cur.Y -= Constants.Player_Height;
@@ -174,7 +164,11 @@ namespace Hopscotch
                                 player.start = player.cur;
                             break;
                         }
+                        */
                 }
+                if (player.cur.X <= player.start.X && player.cur.Y <= player.start.Y)
+                    player.start = player.cur;
+
                 player.bp.Location = player.cur;
                 board.DrawLine(player.prev);
 
@@ -184,8 +178,7 @@ namespace Hopscotch
                 if (board.arr_board[player.prev.Y, player.prev.X] != Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] == Constants.MyArea)
                 {
                     MessageBox.Show("dd");
-                    //board.CheckStart(player.start.Y, player.start.X);
-                    board.DrawArea(player.start.Y, player.start.X, 1);
+                    board.DrawArea(player.start.Y, player.start.X, 1, Constants.Vertex);
                 }
             }
         }
