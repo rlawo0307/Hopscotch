@@ -21,10 +21,12 @@ namespace Hopscotch
 
             public const int Empty = 0;
             public const int Path = 1;
-            public const int Border = 2;
-            public const int Area = 3;
-            public const int ReversePoint = 4;
+            public const int Area = 2;
+            public const int Border = 3;
 
+            public const int Pass = 4;
+            public const int ReversePass = 5;
+            
             public const int Forward = 1;
             public const int Reverse = -1;
         }
@@ -54,9 +56,10 @@ namespace Hopscotch
         {
             public Panel panel_board;
             public int[,] arr_board;
+
             Graphics g;
-            Color[] color = { Color.Black, Color.Red, Color.Yellow, Color.Gray, Color.Blue };
-            SolidBrush[] brush = new SolidBrush[5];
+            Color[] color = { Color.Black, Color.Red, Color.Gray, Color.Yellow, Color.OliveDrab, Color.Blue };
+            SolidBrush[] brush = new SolidBrush[6];
             public Board()
             {
                 panel_board = new Panel();
@@ -68,8 +71,13 @@ namespace Hopscotch
 
                 arr_board = new int[Constants.Board_Height, Constants.Board_Width];
 
-                for (int i = 0; i < 5; i++)
+                for (int i = 0; i < 6; i++)
                     brush[i] = new SolidBrush(color[i]);
+            }
+
+            void DrawArea(Point prev)
+            {
+                g.FillRectangle(brush[Constants.Area], new Rectangle(prev.X, prev.Y, Constants.Player_Width, Constants.Player_Height));
             }
 
             public void DrawPath(Point prev)
@@ -77,14 +85,19 @@ namespace Hopscotch
                 g.FillRectangle(brush[Constants.Path], new Rectangle(prev.X, prev.Y, Constants.Player_Width, Constants.Player_Height));
             }
 
-            public void DrawBorder(Point prev)
+            void DrawBorder(Point prev)
             {
                 g.FillRectangle(brush[Constants.Border], new Rectangle(prev.X, prev.Y, Constants.Player_Width, Constants.Player_Height));
             }
 
-            public void DrawReversePoint(Point prev)
+            void DrawPass(Point prev)
             {
-                g.FillRectangle(brush[Constants.ReversePoint], new Rectangle(prev.X, prev.Y, Constants.Player_Width, Constants.Player_Height));
+                g.FillRectangle(brush[Constants.Pass], new Rectangle(prev.X, prev.Y, Constants.Player_Width, Constants.Player_Height));
+            }
+
+            void DrawReversePoint(Point prev)
+            {
+                g.FillRectangle(brush[Constants.ReversePass], new Rectangle(prev.X, prev.Y, Constants.Player_Width, Constants.Player_Height));
             }
 
             public void DrawArea(Point cur, int i,int j, int direc, int val)
@@ -92,33 +105,37 @@ namespace Hopscotch
                 if (i < 0 || i > Constants.Board_Height || j < 0 || j > Constants.Board_Width)
                     return;
 
-                if (arr_board[i, j] == Constants.Path || arr_board[i,j] == Constants.Border) 
-                    arr_board[i, j] = val;
+                if (arr_board[i, j] == Constants.Path || arr_board[i, j] == Constants.Border)
+                {
+                    if (arr_board[i, j - Constants.Player_Width] == Constants.Area && arr_board[i, j + Constants.Player_Width] == Constants.Area)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        arr_board[i, j] = val;
+                        DrawPass(new Point(j, i));
+
+                        if (arr_board[i, j] == Constants.ReversePass)
+                            DrawReversePoint(new Point(j, i));
+
+                        if ((direc == Constants.Forward &&
+                                (arr_board[i - Constants.Player_Height, j] != Constants.Path
+                                && arr_board[i-Constants.Player_Width,j] != Constants.Border))
+                            || direc == Constants.Reverse)
+                            FillArea(cur, i, j, direc);
+                    }
+                    //MessageBox.Show("dd");
+                    DrawArea(cur, i + Constants.Player_Height, j, Constants.Forward, Constants.Pass);
+                    DrawArea(cur, i - Constants.Player_Height, j, Constants.Reverse, Constants.ReversePass);
+                    DrawArea(cur, i, j - Constants.Player_Width, Constants.Forward, Constants.Pass);
+                    DrawArea(cur, i, j + Constants.Player_Width, Constants.Forward, Constants.Pass);
+                }
                 else
                     return;
-
-                arr_board[i, j] = val;
-
-                DrawBorder(new Point(j,i));
-                MessageBox.Show("dd");
-
-                if (arr_board[i - Constants.Player_Height, j] == Constants.Path)
-                {
-                    arr_board[i, j] = Constants.ReversePoint;
-                    DrawReversePoint(new Point(j,i));
-                }
-
-                if (direc == Constants.Forward)
-                    //|| (direc == Constants.Reverse && arr_board[i + Constants.Player_Height, j] == Constants.ReversePoint))
-                    FillArea(i, j, direc);
-
-                DrawArea(cur, i + Constants.Player_Height, j, Constants.Forward, Constants.Border);
-                DrawArea(cur, i - Constants.Player_Height, j, Constants.Reverse, Constants.Border);
-                DrawArea(cur, i, j - Constants.Player_Width, Constants.Forward, Constants.Border);
-                DrawArea(cur, i, j + Constants.Player_Width, Constants.Forward, Constants.Border);
             }
 
-            public void FillArea(int i, int x, int direc)
+            public void FillArea(Point cur, int i, int x, int direc)
             {
                 int j = x + Constants.Player_Width * direc;
                 while (arr_board[i, j] == Constants.Empty)
@@ -126,9 +143,22 @@ namespace Hopscotch
                     arr_board[i, j] = Constants.Area;
                     g.FillRectangle(brush[Constants.Area], new Rectangle(j, i, Constants.Player_Width, Constants.Player_Height));
                     j += Constants.Player_Width * direc;
+
+                    //if (arr_board[i, j + Constants.Player_Width] == Constants.Area)
+                    //    arr_board[i, j] = Constants.Empty;
                 }
             }
 
+            public void AssumeArea()
+            {
+                for (int i = 0; i < Constants.Board_Height; i++)
+                    for (int j = 0; j < Constants.Board_Width; j++)
+                        if (arr_board[i, j] >= Constants.Pass)
+                        {
+                            arr_board[i, j] = Constants.Border;
+                            DrawBorder(new Point(j, i));
+                        }
+            }
         }
 
         Player player;
@@ -191,7 +221,10 @@ namespace Hopscotch
                 if (board.arr_board[player.prev.Y, player.prev.X] == Constants.Path && board.arr_board[player.cur.Y, player.cur.X] == Constants.Border)
                 {
                     MessageBox.Show("dd");
-                    board.DrawArea(player.cur, player.start.Y, player.start.X, Constants.Forward, Constants.Border);
+                    board.arr_board[player.cur.Y, player.cur.X] = Constants.Path;
+                    board.DrawArea(player.cur, player.start.Y, player.start.X, Constants.Forward, Constants.Pass);
+                    //MessageBox.Show("Assume");
+                    board.AssumeArea();
                 }
             }
         }
