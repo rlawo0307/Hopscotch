@@ -68,11 +68,12 @@ namespace Hopscotch
                 arr_board = new int[Constants.Board_Height, Constants.Board_Width];
             }
 
-            public void DrawLine(Point p)
+            public void DrawLine(Point prev, Point cur)
             {
-                if(arr_board[p.Y, p.X] == Constants.Empty)
-                    arr_board[p.Y, p.X] = Constants.Mypath;
-                g.FillRectangle(sb, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
+                g.FillRectangle(sb, new Rectangle(prev.X, prev.Y, Constants.Player_Width, Constants.Player_Height));
+
+                if (arr_board[cur.Y, cur.X] == Constants.Empty)
+                    arr_board[cur.Y, cur.X] = Constants.Mypath;
             }
 
             public void CheckStart(int i, int j)
@@ -92,7 +93,7 @@ namespace Hopscotch
                     return;
 
                 CheckStart(i, j);
-                MessageBox.Show("dd");
+                //MessageBox.Show("dd");
 
                 if (arr_board[i, j - Constants.Player_Width] != Constants.Empty || arr_board[i, j + Constants.Player_Width] != Constants.Empty)
                     arr_board[i, j] = Constants.Vertex;
@@ -158,16 +159,18 @@ namespace Hopscotch
                     player.start = player.cur;
 
                 player.bp.Location = player.cur;
-                board.DrawLine(player.prev);
+                board.DrawLine(player.prev, player.cur);
 
-                if (board.arr_board[player.prev.Y, player.prev.X] >= Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] < Constants.MyArea)
+                if (board.arr_board[player.prev.Y, player.prev.X] >= Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] == Constants.Mypath)
                 {
+                    MessageBox.Show("dd");
                     player.start = player.prev;
                 }
 
-                if (board.arr_board[player.prev.Y, player.prev.X] < Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] >= Constants.MyArea)
+                if (board.arr_board[player.prev.Y, player.prev.X] == Constants.Mypath && board.arr_board[player.cur.Y, player.cur.X] >= Constants.MyArea)
                 {
-                    board.DrawArea(player.cur, player.start.Y, player.start.X, Constants.Forward, Constants.Mypath);
+                    MessageBox.Show("ss");
+                    board.DrawArea(player.cur, player.start.Y, player.start.X, Constants.Forward, Constants.MyArea);
                 }
             }
         }
