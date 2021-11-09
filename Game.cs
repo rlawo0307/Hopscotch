@@ -55,7 +55,6 @@ namespace Hopscotch
             Graphics g;
             SolidBrush sb;
             public int[,] arr_board;
-
             public Board()
             {
                 panel_board = new Panel();
@@ -87,7 +86,7 @@ namespace Hopscotch
                 if (i < 0 || i > Constants.Board_Height || j < 0 || j > Constants.Board_Width)
                     return;
 
-                if (arr_board[i, j] == Constants.Mypath || (i == cur.Y && j == cur.X))
+                if (arr_board[i, j] == Constants.Mypath || (i == cur.Y && j == cur.X)) 
                     arr_board[i, j] = val;
                 else
                     return;
@@ -98,13 +97,10 @@ namespace Hopscotch
                 if (arr_board[i, j - Constants.Player_Width] != Constants.Empty || arr_board[i, j + Constants.Player_Width] != Constants.Empty)
                     arr_board[i, j] = Constants.Vertex;
                 if (arr_board[i, j] != Constants.Vertex)
-                    FillArea(i, j, Constants.Forward);
+                    FillArea(i, j, direc);
 
                 DrawArea(cur, i + Constants.Player_Height, j, Constants.Forward, Constants.MyArea);
-                if (arr_board[i, j] == Constants.Vertex)
-                    DrawArea(cur, i - Constants.Player_Height, j, Constants.Reverse, Constants.MyArea);
-                else
-                    DrawArea(cur, i - Constants.Player_Height, j, Constants.Forward, Constants.MyArea);
+                DrawArea(cur, i - Constants.Player_Height, j, Constants.Reverse, Constants.MyArea);
                 DrawArea(cur, i, j - Constants.Player_Width, Constants.Forward, Constants.MyArea);
                 DrawArea(cur, i, j + Constants.Player_Width, Constants.Forward, Constants.MyArea);
             }
@@ -165,11 +161,13 @@ namespace Hopscotch
                 board.DrawLine(player.prev);
 
                 if (board.arr_board[player.prev.Y, player.prev.X] >= Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] < Constants.MyArea)
+                {
                     player.start = player.prev;
+                }
 
                 if (board.arr_board[player.prev.Y, player.prev.X] < Constants.MyArea && board.arr_board[player.cur.Y, player.cur.X] >= Constants.MyArea)
                 {
-                    board.DrawArea(player.cur, player.start.Y, player.start.X, Constants.Forward, Constants.Vertex);
+                    board.DrawArea(player.cur, player.start.Y, player.start.X, Constants.Forward, Constants.Mypath);
                 }
             }
         }
