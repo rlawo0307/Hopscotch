@@ -17,72 +17,121 @@ namespace Hopscotch
             public const int Board_Width = 600, Board_Height = 500;
             public const int Player_Width = 10, Player_Height = 10;
             //public const string ImagePath = "./res/Image/Image1.jpg";
+
+            public const int Empty = 0;
+            public const int Path = 1;
+            public const int Area = 2;
         }
 
         class Player
         {
-            public Button bp;
             public Point cur;
             public Point prev;
-
-            public Player()
+            public Point left_top;
+            
+            public Player(Point p)
             {
-                prev = cur = new Point(0, 0);
-
-                bp = new Button();
-                bp.Size = new Size(Constants.Player_Width, Constants.Player_Height);
-                bp.Location = cur;
-                bp.BackColor = Color.White;
-                bp.FlatAppearance.BorderSize = 0;
-                bp.FlatStyle = FlatStyle.Flat;
-                bp.Enabled = false;
-            }  
+                prev = cur = left_top = p;
+            }
+            
+            public void UpdateLeftTop()
+            {
+                if (cur.X <= left_top.X && cur.Y <= left_top.Y)
+                    left_top = cur;
+            }
         }
 
         class Board
         {
             public Panel panel_board;
-            Point pos;
-
             Graphics g;
-            Color[] color = { Color.Black, Color.Red, Color.Gray }; // Empty, Path, Area
-            SolidBrush[] brush = new SolidBrush[3];
+            Color[] color = { Color.Black, Color.Red, Color.Gray, Color.White }; // Empty, Path, Area, Player
+            SolidBrush[] brush = new SolidBrush[4];
+            int[,] board;
+
             public Board(Point p)
             {
+                int board_row = Constants.Board_Height / Constants.Player_Height;
+                int board_col = Constants.Board_Width / Constants.Player_Width;
                 panel_board = new Panel();
                 panel_board.Size = new Size(Constants.Board_Width, Constants.Board_Height);
                 panel_board.Location = new Point(0, 0);
                 panel_board.BackColor = Color.Black;
-                pos = p;
+
+                board = new int[board_row, board_col];
+                for (int i = 0; i < board_row; i++)
+                    for (int j = 0; j < board_col; j++)
+                        board[i, j] = Constants.Empty;
 
                 g = panel_board.CreateGraphics();
 
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 4; i++)
                     brush[i] = new SolidBrush(color[i]);
             }
 
-            public Color GetColor(Point p)
+            public void DrawRect(Point p, int val)
             {
-                Bitmap bmp = new Bitmap(Constants.Player_Width, Constants.Player_Height);
-                Color c;
-                using (Graphics gr = Graphics.FromImage(bmp))
+                int i = p.Y / Constants.Player_Height;
+                int j = p.X / Constants.Player_Width;
+
+                if (board[i, j] != Constants.Area)
+                    board[i, j] = val;
+                g.FillRectangle(brush[GetBoard(p)], new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
+            }
+
+            public void DrawPlayer(Point p)
+            {
+                int i = p.Y / Constants.Player_Height;
+                int j = p.X / Constants.Player_Width;
+
+                g.FillRectangle(brush[3], new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
+            }
+
+            public int GetBoard(Point p)
+            {
+                int i = p.Y / Constants.Player_Height;
+                int j = p.X / Constants.Player_Width;
+
+                return board[i, j];
+            }
+
+            public Point GetInnerPoint(Point p)
+            {
+                Point res = new Point(-1, -1);
+
+                if(GetBoard(new Point(p.X+ Constants.Player_Width, p.Y)) != Constants.Empty && GetBoard(new Point(p.X, p.Y+ Constants.Player_Height)) != Constants.Empty)
                 {
-                    gr.CopyFromScreen(pos.X + p.X, pos.Y + p.Y, 0, 0, new Size(Constants.Player_Width, Constants.Player_Height));
+                    res.X = p.X + Constants.Player_Width;
+                    res.Y = p.Y + Constants.Player_Height;
                 }
-                bmp.Save("./res/player.jpg");
-                c = bmp.GetPixel(0, 0);
-                bmp.Dispose();
-                return c;
+                return res;
             }
 
-            public void DrawPath(Point p)
+            public void FillArea(Point p)
             {
-                g.FillRectangle(brush[1], new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
-            }
+                if (p.X < 0 || p.X >= Constants.Board_Width || p.Y < 0 || p.Y >= Constants.Board_Height)
+                    return;
 
-            public void FillArea(int i, int j, int direc)
-            {
-                g.FillRectangle(brush[2], new Rectangle(j, i, Constants.Player_Width, Constants.Player_Height));
+                int key = GetBoard(p);
+
+                switch (key)
+                {
+                    case Constants.Area: return;
+                    case Constants.Path: DrawRect(p, Constants.Area); break;
+                    case Constants.Empty:
+                        {
+                            DrawRect(p, Constants.Area);
+                            FillArea(new Point(p.X - Constants.Player_Width, p.Y)); // left
+                            FillArea(new Point(p.X + Constants.Player_Width, p.Y)); // right
+                            FillArea(new Point(p.X, p.Y - Constants.Player_Height)); // up
+                            FillArea(new Point(p.X, p.Y + Constants.Player_Height)); // down
+                            FillArea(new Point(p.X - Constants.Player_Width, p.Y - Constants.Player_Height)); // up left
+                            FillArea(new Point(p.X + Constants.Player_Width, p.Y - Constants.Player_Height)); // up right
+                            FillArea(new Point(p.X - Constants.Player_Width, p.Y + Constants.Player_Height)); // down left
+                            FillArea(new Point(p.X + Constants.Player_Width, p.Y + Constants.Player_Height)); // down right
+                            break;
+                        }
+                }
             }
         }
 
@@ -97,11 +146,11 @@ namespace Hopscotch
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(0,0);
 
-            player = new Player();
-            this.Controls.Add(player.bp);
-
-            board = new Board(new Point(this.Left+12, this.Top+this.Height-this.ClientRectangle.Height+8));
+            board = new Board(new Point(this.Left + 12, this.Top + this.Height - this.ClientRectangle.Height + 8));
             this.Controls.Add(board.panel_board);
+            board.DrawRect(new Point(0,0), Constants.Area);
+
+            player = new Player(new Point(0, 0)); // Start Point
 
             KeyPreview = true;
             this.KeyDown += Key_Down;
@@ -121,13 +170,18 @@ namespace Hopscotch
                     case Keys.S: if (player.cur.Y + Constants.Player_Height < Constants.Board_Height) player.cur.Y += Constants.Player_Height; break;
                     case Keys.W: if (player.cur.Y > 0) player.cur.Y -= Constants.Player_Height; break;
                 }
-                player.bp.Location = player.cur;
-                board.DrawPath(player.prev);
-
-                Color c = board.GetColor(player.prev);
-                MessageBox.Show("" + c);
-                c = board.GetColor(player.cur);
-                MessageBox.Show("" + c);
+                board.DrawRect(player.prev, Constants.Path);
+                board.DrawPlayer(player.cur);
+                player.UpdateLeftTop();
+                if (board.GetBoard(player.cur) == Constants.Area)
+                {
+                    Point innerpoint = board.GetInnerPoint(player.left_top);
+                    if (!innerpoint.Equals(new Point(-1, -1)))
+                    {
+                        board.FillArea(innerpoint);
+                        player.left_top = player.cur;
+                    }
+                }
             }
         }
     }  
