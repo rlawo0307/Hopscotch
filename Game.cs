@@ -18,28 +18,18 @@ namespace Hopscotch
             public const int Board_Width = 500, Board_Height = 400;
             public const int Player_Width = 10, Player_Height = 10;
             //public const string ImagePath = "./res/Image/Image1.jpg";
-
-            public const int Empty = 0;
-            public const int Path = 1;
-            public const int Area = 2;
-            public const int Border = 3;
-
-            public const int Pass = 4;
-            public const int ReversePass = 5;
-            
-            public const int Forward = 1;
-            public const int Reverse = -1;
         }
 
         class Player
         {
             public Button bp;
-            public Point prev;
             public Point cur;
-            public Point start;
+            public Point prev;
 
             public Player()
             {
+                prev = cur = new Point(60, 60);
+
                 bp = new Button();
                 bp.Size = new Size(Constants.Player_Width, Constants.Player_Height);
                 bp.Location = cur;
@@ -47,19 +37,17 @@ namespace Hopscotch
                 bp.FlatAppearance.BorderSize = 0;
                 bp.FlatStyle = FlatStyle.Flat;
                 bp.Enabled = false;
-
-                cur = new Point(60, 60);
             }  
         }
 
         class Board
         {
+            public static extern int GetSystemMetrics(int nIndex);
             public Panel panel_board;
-            public int[,] arr_board;
 
             Graphics g;
-            Color[] color = { Color.Black, Color.Red, Color.Gray, Color.Yellow, Color.OliveDrab, Color.Blue };
-            SolidBrush[] brush = new SolidBrush[6];
+            Color[] color = { Color.Black, Color.Red, Color.Gray }; // Empty, Path, Area
+            SolidBrush[] brush = new SolidBrush[3];
             public Board()
             {
                 panel_board = new Panel();
@@ -69,95 +57,34 @@ namespace Hopscotch
 
                 g = panel_board.CreateGraphics();
 
-                arr_board = new int[Constants.Board_Height, Constants.Board_Width];
-
-                for (int i = 0; i < 6; i++)
+                for (int i = 0; i < 3; i++)
                     brush[i] = new SolidBrush(color[i]);
             }
 
-            void DrawArea(Point prev)
+            public void GetColor(Point p)
             {
-                g.FillRectangle(brush[Constants.Area], new Rectangle(prev.X, prev.Y, Constants.Player_Width, Constants.Player_Height));
-            }
-
-            public void DrawPath(Point prev)
-            {
-                g.FillRectangle(brush[Constants.Path], new Rectangle(prev.X, prev.Y, Constants.Player_Width, Constants.Player_Height));
-            }
-
-            void DrawBorder(Point prev)
-            {
-                g.FillRectangle(brush[Constants.Border], new Rectangle(prev.X, prev.Y, Constants.Player_Width, Constants.Player_Height));
-            }
-
-            void DrawPass(Point prev)
-            {
-                g.FillRectangle(brush[Constants.Pass], new Rectangle(prev.X, prev.Y, Constants.Player_Width, Constants.Player_Height));
-            }
-
-            void DrawReversePoint(Point prev)
-            {
-                g.FillRectangle(brush[Constants.ReversePass], new Rectangle(prev.X, prev.Y, Constants.Player_Width, Constants.Player_Height));
-            }
-
-            public void DrawArea(Point cur, int i,int j, int direc, int val)
-            {
-                if (i < 0 || i > Constants.Board_Height || j < 0 || j > Constants.Board_Width)
-                    return;
-
-                if (arr_board[i, j] == Constants.Path || arr_board[i, j] == Constants.Border)
+                Point cp = new Point(GetSystemMetrics(4), 1);
+                MessageBox.Show("" + cp);
+                MessageBox.Show("" + panel_board.Location);
+                //Bitmap bmp = new Bitmap(Constants.Player_Width, Constants.Player_Height);
+                Bitmap bmp = new Bitmap(Constants.Board_Width, Constants.Board_Height);
+                using (Graphics gr = Graphics.FromImage(bmp))
                 {
-                    if (arr_board[i, j - Constants.Player_Width] == Constants.Area && arr_board[i, j + Constants.Player_Width] == Constants.Area)
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        arr_board[i, j] = val;
-                        DrawPass(new Point(j, i));
-
-                        if (arr_board[i, j] == Constants.ReversePass)
-                            DrawReversePoint(new Point(j, i));
-
-                        if ((direc == Constants.Forward &&
-                                (arr_board[i - Constants.Player_Height, j] != Constants.Path
-                                && arr_board[i-Constants.Player_Width,j] != Constants.Border))
-                            || direc == Constants.Reverse)
-                            FillArea(cur, i, j, direc);
-                    }
-                    //MessageBox.Show("dd");
-                    DrawArea(cur, i + Constants.Player_Height, j, Constants.Forward, Constants.Pass);
-                    DrawArea(cur, i - Constants.Player_Height, j, Constants.Reverse, Constants.ReversePass);
-                    DrawArea(cur, i, j - Constants.Player_Width, Constants.Forward, Constants.Pass);
-                    DrawArea(cur, i, j + Constants.Player_Width, Constants.Forward, Constants.Pass);
+                    gr.CopyFromScreen(0,0, 0, 0, new Size(Constants.Board_Width, Constants.Board_Height));
+                    //gr.CopyFromScreen(p.X, p.Y, 0, 0, new Size(Constants.Player_Width*10, Constants.Player_Height));
                 }
-                else
-                    return;
+                bmp.Save("./res/player.jpg");
+                bmp.Dispose();
             }
 
-            public void FillArea(Point cur, int i, int x, int direc)
+            public void DrawPath(Point p)
             {
-                int j = x + Constants.Player_Width * direc;
-                while (arr_board[i, j] == Constants.Empty)
-                {
-                    arr_board[i, j] = Constants.Area;
-                    g.FillRectangle(brush[Constants.Area], new Rectangle(j, i, Constants.Player_Width, Constants.Player_Height));
-                    j += Constants.Player_Width * direc;
-
-                    //if (arr_board[i, j + Constants.Player_Width] == Constants.Area)
-                    //    arr_board[i, j] = Constants.Empty;
-                }
+                g.FillRectangle(brush[1], new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
             }
 
-            public void AssumeArea()
+            public void FillArea(int i, int j, int direc)
             {
-                for (int i = 0; i < Constants.Board_Height; i++)
-                    for (int j = 0; j < Constants.Board_Width; j++)
-                        if (arr_board[i, j] >= Constants.Pass)
-                        {
-                            arr_board[i, j] = Constants.Border;
-                            DrawBorder(new Point(j, i));
-                        }
+                g.FillRectangle(brush[2], new Rectangle(j, i, Constants.Player_Width, Constants.Player_Height));
             }
         }
 
@@ -178,10 +105,10 @@ namespace Hopscotch
             board = new Board();
             this.Controls.Add(board.panel_board);
 
-            board.arr_board[player.cur.Y, player.cur.X] = Constants.Border;
-
             KeyPreview = true;
             this.KeyDown += Key_Down;
+
+            MessageBox.Show("" + this.Location);
         }
 
         private void Key_Down(object sender, KeyEventArgs e)
@@ -189,7 +116,6 @@ namespace Hopscotch
             if (e.KeyCode == Keys.A || e.KeyCode == Keys.D || e.KeyCode == Keys.S || e.KeyCode == Keys.W)
             {
                 player.prev = player.cur;
-
                 switch (e.KeyCode)
                 {
                     case Keys.A: if (player.cur.X > 0) player.cur.X -= Constants.Player_Width; break;
@@ -197,35 +123,9 @@ namespace Hopscotch
                     case Keys.S: if (player.cur.Y + Constants.Player_Height < Constants.Board_Height) player.cur.Y += Constants.Player_Height; break;
                     case Keys.W: if (player.cur.Y - Constants.Player_Height > 0) player.cur.Y -= Constants.Player_Height; break;
                 }
-
                 player.bp.Location = player.cur;
-
-                if (player.cur.X <= player.start.X && player.cur.Y <= player.start.Y)
-                    player.start = player.cur;
-
-                if (board.arr_board[player.cur.Y, player.cur.X] == Constants.Empty)
-                {
-                    board.arr_board[player.cur.Y, player.cur.X] = Constants.Path;
-                    //board.DrawPath(player.prev);
-                }
-
                 board.DrawPath(player.prev);
-                //MessageBox.Show("cur : "+board.arr_board[player.cur.Y,player.cur.X]+"\nprev : "+ board.arr_board[player.prev.Y, player.prev.X]);
-
-                if (board.arr_board[player.prev.Y, player.prev.X] == Constants.Border && board.arr_board[player.cur.Y, player.cur.X] == Constants.Path)
-                {
-                    MessageBox.Show("ss");
-                    player.start = player.cur;
-                }
-
-                if (board.arr_board[player.prev.Y, player.prev.X] == Constants.Path && board.arr_board[player.cur.Y, player.cur.X] == Constants.Border)
-                {
-                    MessageBox.Show("dd");
-                    board.arr_board[player.cur.Y, player.cur.X] = Constants.Path;
-                    board.DrawArea(player.cur, player.start.Y, player.start.X, Constants.Forward, Constants.Pass);
-                    //MessageBox.Show("Assume");
-                    board.AssumeArea();
-                }
+                board.GetColor(player.prev);
             }
         }
     }  

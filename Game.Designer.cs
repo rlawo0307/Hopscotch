@@ -39,6 +39,7 @@ namespace Hopscotch
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "Game";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.WindowsDefaultBounds;
             this.Text = "HopScotch";
             this.ResumeLayout(false);
 
