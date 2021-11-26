@@ -20,9 +20,7 @@ namespace Hopscotch
         private void Btn_Play_Click(object sender, EventArgs e)
         {
             Game gameform = new Game();
-            //gameform.StartPosition = FormStartPosition.Manual;
-            //gameform.Location = new Point(0, 0);
-            gameform.ShowDialog();
+            
         }
 
         private void Btn_Help_Click(object sender, EventArgs e)

@@ -14,8 +14,7 @@ namespace Hopscotch
     {
         static class Constants
         {
-            public const int Form_Width = 600, Form_Height = 500;
-            public const int Board_Width = 500, Board_Height = 400;
+            public const int Board_Width = 600, Board_Height = 500;
             public const int Player_Width = 10, Player_Height = 10;
             //public const string ImagePath = "./res/Image/Image1.jpg";
         }
@@ -28,7 +27,7 @@ namespace Hopscotch
 
             public Player()
             {
-                prev = cur = new Point(60, 60);
+                prev = cur = new Point(0, 0);
 
                 bp = new Button();
                 bp.Size = new Size(Constants.Player_Width, Constants.Player_Height);
@@ -42,18 +41,19 @@ namespace Hopscotch
 
         class Board
         {
-            public static extern int GetSystemMetrics(int nIndex);
             public Panel panel_board;
+            Point pos;
 
             Graphics g;
             Color[] color = { Color.Black, Color.Red, Color.Gray }; // Empty, Path, Area
             SolidBrush[] brush = new SolidBrush[3];
-            public Board()
+            public Board(Point p)
             {
                 panel_board = new Panel();
                 panel_board.Size = new Size(Constants.Board_Width, Constants.Board_Height);
                 panel_board.Location = new Point(0, 0);
                 panel_board.BackColor = Color.Black;
+                pos = p;
 
                 g = panel_board.CreateGraphics();
 
@@ -61,20 +61,18 @@ namespace Hopscotch
                     brush[i] = new SolidBrush(color[i]);
             }
 
-            public void GetColor(Point p)
+            public Color GetColor(Point p)
             {
-                Point cp = new Point(GetSystemMetrics(4), 1);
-                MessageBox.Show("" + cp);
-                MessageBox.Show("" + panel_board.Location);
-                //Bitmap bmp = new Bitmap(Constants.Player_Width, Constants.Player_Height);
-                Bitmap bmp = new Bitmap(Constants.Board_Width, Constants.Board_Height);
+                Bitmap bmp = new Bitmap(Constants.Player_Width, Constants.Player_Height);
+                Color c;
                 using (Graphics gr = Graphics.FromImage(bmp))
                 {
-                    gr.CopyFromScreen(0,0, 0, 0, new Size(Constants.Board_Width, Constants.Board_Height));
-                    //gr.CopyFromScreen(p.X, p.Y, 0, 0, new Size(Constants.Player_Width*10, Constants.Player_Height));
+                    gr.CopyFromScreen(pos.X + p.X, pos.Y + p.Y, 0, 0, new Size(Constants.Player_Width, Constants.Player_Height));
                 }
                 bmp.Save("./res/player.jpg");
+                c = bmp.GetPixel(0, 0);
                 bmp.Dispose();
+                return c;
             }
 
             public void DrawPath(Point p)
@@ -95,20 +93,20 @@ namespace Hopscotch
         {
             InitializeComponent();
 
-            this.Size = new Size(Constants.Form_Width, Constants.Form_Height);
+            this.Size = new Size(Constants.Board_Width+16, Constants.Board_Height+39);
             this.StartPosition = FormStartPosition.Manual;
-            this.Location = new Point(0, 0);
+            this.Location = new Point(0,0);
 
             player = new Player();
             this.Controls.Add(player.bp);
 
-            board = new Board();
+            board = new Board(new Point(this.Left+12, this.Top+this.Height-this.ClientRectangle.Height+8));
             this.Controls.Add(board.panel_board);
 
             KeyPreview = true;
             this.KeyDown += Key_Down;
 
-            MessageBox.Show("" + this.Location);
+            this.Show();
         }
 
         private void Key_Down(object sender, KeyEventArgs e)
@@ -121,11 +119,15 @@ namespace Hopscotch
                     case Keys.A: if (player.cur.X > 0) player.cur.X -= Constants.Player_Width; break;
                     case Keys.D: if (player.cur.X + Constants.Player_Width < Constants.Board_Width) player.cur.X += Constants.Player_Width; break;
                     case Keys.S: if (player.cur.Y + Constants.Player_Height < Constants.Board_Height) player.cur.Y += Constants.Player_Height; break;
-                    case Keys.W: if (player.cur.Y - Constants.Player_Height > 0) player.cur.Y -= Constants.Player_Height; break;
+                    case Keys.W: if (player.cur.Y > 0) player.cur.Y -= Constants.Player_Height; break;
                 }
                 player.bp.Location = player.cur;
                 board.DrawPath(player.prev);
-                board.GetColor(player.prev);
+
+                Color c = board.GetColor(player.prev);
+                MessageBox.Show("" + c);
+                c = board.GetColor(player.cur);
+                MessageBox.Show("" + c);
             }
         }
     }  
