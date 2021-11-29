@@ -107,6 +107,13 @@ namespace Hopscotch
                 return res;
             }
 
+            public void CheckInnerPoint(Point p)
+            {
+                SolidBrush sb = new SolidBrush(Color.Yellow);
+                g.FillRectangle(sb, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
+
+            }
+
             public void FillArea(Point p)
             {
                 if (p.X < 0 || p.X >= Constants.Board_Width || p.Y < 0 || p.Y >= Constants.Board_Height)
@@ -117,7 +124,26 @@ namespace Hopscotch
                 switch (key)
                 {
                     case Constants.Area: return;
-                    case Constants.Path: DrawRect(p, Constants.Area); break;
+                    case Constants.Path:
+                        {
+                            Point tmp = p;
+
+                            DrawRect(p, Constants.Area);
+                            tmp.X = p.X - Constants.Player_Width;
+                            if (GetBoard(tmp) == Constants.Path)
+                                FillArea(tmp); // left
+                            tmp.X = p.X + Constants.Player_Width;
+                            if (GetBoard(tmp) == Constants.Path)
+                                FillArea(tmp); // right
+                            tmp.X = p.X;
+                            tmp.Y = p.Y - Constants.Player_Height;
+                            if (GetBoard(tmp) == Constants.Path)
+                                FillArea(tmp); // up
+                            tmp.Y = p.Y + Constants.Player_Height;
+                            if (GetBoard(tmp) == Constants.Path)
+                                FillArea(tmp); // down
+                            break;
+                        }
                     case Constants.Empty:
                         {
                             DrawRect(p, Constants.Area);
@@ -176,8 +202,12 @@ namespace Hopscotch
                 if (board.GetBoard(player.cur) == Constants.Area)
                 {
                     Point innerpoint = board.GetInnerPoint(player.left_top);
+                    //board.CheckInnerPoint(innerpoint);
+                    //MessageBox.Show("dd");
                     if (!innerpoint.Equals(new Point(-1, -1)))
                     {
+                        //board.CheckInnerPoint(innerpoint);
+                        //MessageBox.Show("dd");
                         board.FillArea(innerpoint);
                         player.left_top = player.cur;
                     }
