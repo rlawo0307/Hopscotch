@@ -130,46 +130,6 @@ namespace Hopscotch
                 return board[i, j];
             }
 
-            Point ChangeLeftTop(Point p)
-            {
-                Point left = p, right = p; ;
-                int leftcnt = 0, rightcnt = 0;
-                while (GetBoard(new Point(left.X - Constants.Player_Width, left.Y)) == Constants.Empty)
-                {
-                    left.X -= Constants.Player_Width;
-                    leftcnt++;
-                }
-                while (GetBoard(new Point(right.X - Constants.Player_Width, right.Y)) == Constants.Empty)
-                {
-                    right.X -= Constants.Player_Width;
-                    rightcnt++;
-                }
-                if (leftcnt < rightcnt)
-                    return left;
-                else
-                    return right;
-            }
-
-            Point ChangeRightBottom(Point p)
-            {
-                Point left = p, right = p; ;
-                int leftcnt = 0, rightcnt = 0;
-                while (GetBoard(new Point(left.X - Constants.Player_Width, left.Y)) == Constants.Empty)
-                {
-                    left.X -= Constants.Player_Width;
-                    leftcnt++;
-                }
-                while (GetBoard(new Point(right.X - Constants.Player_Width, right.Y)) == Constants.Empty)
-                {
-                    right.X -= Constants.Player_Width;
-                    rightcnt++;
-                }
-                if (leftcnt < rightcnt)
-                    return left;
-                else
-                    return right;
-            }
-
             public Point GetInnerPoint(Point s, Point e, ref Point lt, ref Point rb)
             {
                 Point res = new Point(-1, -1);
@@ -226,27 +186,6 @@ namespace Hopscotch
                     res.Y = (lt.Y + rb.Y) / 2 / Constants.Player_Height * Constants.Player_Height;
                 }
                 return res;
-            }
-
-            public void CheckRightBottom(Point p)
-            {
-                SolidBrush sb = new SolidBrush(Color.Yellow);
-                g.FillRectangle(sb, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
-
-            }
-
-            public void CheckLeftTop(Point p)
-            {
-                SolidBrush sb = new SolidBrush(Color.Blue);
-                g.FillRectangle(sb, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
-
-            }
-
-            public void CheckInnerPoint(Point p)
-            {
-                SolidBrush sb = new SolidBrush(Color.Green);
-                g.FillRectangle(sb, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
-
             }
 
             public void FillPath(Point p)
@@ -363,12 +302,6 @@ namespace Hopscotch
                         player.end = player.prev;
 
                         Point innerpoint = board.GetInnerPoint(player.start, player.end, ref player.left_top, ref player.right_bottom);
-
-                        board.CheckLeftTop(player.left_top);
-                        board.CheckRightBottom(player.right_bottom);
-                        board.CheckInnerPoint(innerpoint);
-                        MessageBox.Show("dd");
-
                         board.FillArea(innerpoint);
                         player.draw = false;
                     }
