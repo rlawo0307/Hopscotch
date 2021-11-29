@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Timers;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,11 +17,16 @@ namespace Hopscotch
         {
             public const int Board_Width = 600, Board_Height = 500;
             public const int Player_Width = 10, Player_Height = 10;
-            //public const string ImagePath = "./res/Image/Image1.jpg";
 
             public const int Empty = 0;
             public const int Path = 1;
             public const int Area = 2;
+            public const int Player = 3;
+            public const int Monster = 4;
+
+            public const int MonsterCnt = 1;
+
+            public const double Speed = 10;
         }
 
         class Player
@@ -55,12 +61,12 @@ namespace Hopscotch
         {
             public Panel panel_board;
             Graphics g;
-            Color[] color = { Color.Black, Color.Red, Color.Gray, Color.White }; // Empty, Path, Area, Player
-            SolidBrush[] brush = new SolidBrush[4];
+            Color[] color = { Color.Black, Color.Red, Color.Gray, Color.White, Color.Yellow }; // Empty, Path, Area, Player
+            SolidBrush[] brush = new SolidBrush[5];
             int[,] board;
             int board_row, board_col;
 
-            public Board(Point p)
+            public Board()
             {
                 board_row = Constants.Board_Height / Constants.Player_Height;
                 board_col = Constants.Board_Width / Constants.Player_Width;
@@ -76,7 +82,7 @@ namespace Hopscotch
 
                 g = panel_board.CreateGraphics();
 
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 5; i++)
                     brush[i] = new SolidBrush(color[i]);
             }
 
@@ -116,10 +122,12 @@ namespace Hopscotch
 
             public void DrawPlayer(Point p)
             {
-                int i = p.Y / Constants.Player_Height;
-                int j = p.X / Constants.Player_Width;
+                g.FillRectangle(brush[Constants.Player], new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
+            }
 
-                g.FillRectangle(brush[3], new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
+            public void DrawMonster(Point p, int val)
+            {
+                g.FillRectangle(brush[val], new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
             }
 
             public int GetBoard(Point p)
@@ -233,9 +241,100 @@ namespace Hopscotch
             }
         }
 
+        class Monster
+        {
+            Random rand_p;
+            Random rand_d;
+            Board board;
+            int mcnt;
+            Point[] cur;
+            int[] direc;
+
+            public Monster(Board board)
+            {
+                Random rand_p = new Random();
+                Random rand_d = new Random();
+
+                this.board = board;
+                mcnt = Constants.MonsterCnt;
+                cur = new Point[mcnt];
+                direc = new int[mcnt];
+                for (int i = 0; i < mcnt; i++)
+                {
+                    RandPoint(rand_p, ref cur[i]);
+                    RandDirec(rand_d, ref direc[i]);
+                }
+
+                System.Timers.Timer timer = new System.Timers.Timer();
+                //timer = new System.Timers.Timer();
+                timer.Interval = 1000 / Constants.Speed; //1sec
+                timer.Elapsed += new System.Timers.ElapsedEventHandler(TimerElapsed);
+                timer.Start();
+            }
+
+            Point GetNextPoint(Point p, int d)
+            {
+                Point res = p;
+                switch (d)
+                {
+                    case 1: res.X -= Constants.Player_Width; res.Y -= Constants.Player_Height; break; //left-up
+                    case 2: res.Y -= Constants.Player_Height; break; //up
+                    case 3: res.X += Constants.Player_Width; res.Y -= Constants.Player_Height; break; //right-up
+                    case 4: res.X -= Constants.Player_Width; break; //left
+                    case 5: res.X += Constants.Player_Width; break; //right
+                    case 6: res.X -= Constants.Player_Width; res.Y += Constants.Player_Height; break; //left-down
+                    case 7: res.Y -= Constants.Player_Height; break; //down
+                    case 8: res.X += Constants.Player_Width; res.Y += Constants.Player_Height; break; // right-down
+                }
+                return res;
+            }
+
+            bool IsReachBoder(Point p)
+            {
+                if (p.X <= 0 || p.X >= Constants.Board_Width - Constants.Player_Width
+                        || p.Y <= 0 || p.Y >= Constants.Board_Height - Constants.Player_Height)
+                    return true;
+                return false;
+            }
+
+            void TimerElapsed(object sender, ElapsedEventArgs e)
+            {
+                for (int i = 0; i < mcnt; i++)
+                {
+                    board.DrawMonster(cur[i], Constants.Empty);
+                    if(IsReachBoder(GetNextPoint(cur[i], direc[i])))
+                    {
+                        Point tmp;
+                        do
+                        {
+                            RandDirec(rand_d, ref direc[i]);
+                            tmp = GetNextPoint(cur[i], direc[i]);
+                        } while (IsReachBoder(tmp));
+                        cur[i] = tmp;
+                    }
+                    else
+                        cur[i] = GetNextPoint(cur[i], direc[i]);
+                    board.DrawMonster(cur[i], Constants.Monster);
+                }
+            }
+
+            void RandPoint(Random rand, ref Point p)
+            {
+                int x = rand.Next(Constants.Player_Width, Constants.Board_Width - Constants.Player_Width) / Constants.Player_Width * Constants.Player_Width;
+                int y = rand.Next(Constants.Player_Height, Constants.Board_Height - Constants.Player_Height) / Constants.Player_Height * Constants.Player_Height;
+                p = new Point(x, y);
+            }
+
+            void RandDirec(Random rand, ref int d)
+            {
+                d = rand.Next(1, 9);
+            }
+        }
+
         Player player;
         Board board;
         Button btn_start;
+        Monster monster;
 
         public Game()
         {
@@ -259,21 +358,23 @@ namespace Hopscotch
         {
             btn_start.Visible = false;
 
-            board = new Board(new Point(this.Left + 12, this.Top + this.Height - this.ClientRectangle.Height + 8));
+            board = new Board();
             this.Controls.Add(board.panel_board);
             board.DarwBorder();
 
             player = new Player(new Point(0, 0)); // Start Point
             board.DrawPlayer(player.cur);
 
+            monster = new Monster(board);
+            if (monster == null)
+                MessageBox.Show("dd");
+
             KeyPreview = true;
             this.KeyDown += Key_Down;
         }
 
-        private void Key_Down(object sender, KeyEventArgs e)
+        void Key_Down(object sender, KeyEventArgs e)
         {
-            board.DarwBorder();
-
             if (e.KeyCode == Keys.A || e.KeyCode == Keys.D || e.KeyCode == Keys.S || e.KeyCode == Keys.W)
             {
                 player.prev = player.cur;
@@ -294,15 +395,12 @@ namespace Hopscotch
                     player.left_top = new Point(Constants.Board_Width, Constants.Board_Height);
                     player.right_bottom = new Point(0, 0);
                 }
-
                 if(player.draw)
                 {
                     if (board.GetBoard(player.cur) == Constants.Area)
                     {
                         player.end = player.prev;
-
-                        Point innerpoint = board.GetInnerPoint(player.start, player.end, ref player.left_top, ref player.right_bottom);
-                        board.FillArea(innerpoint);
+                        board.FillArea(board.GetInnerPoint(player.start, player.end, ref player.left_top, ref player.right_bottom));
                         player.draw = false;
                     }
                     player.UpdateLeftTop();
