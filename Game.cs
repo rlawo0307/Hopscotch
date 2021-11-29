@@ -27,9 +27,11 @@ namespace Hopscotch
         {
             public Point cur;
             public Point prev;
+            public Point start;
+            public Point end;
             public Point left_top;
             public Point right_bottom;
-            public bool start;
+            public bool draw;
             
             public Player(Point p)
             {
@@ -128,16 +130,35 @@ namespace Hopscotch
                 return board[i, j];
             }
 
-            public Point GetInnerPoint(Point lt, Point rb)
+            public Point GetInnerPoint(Point s, Point e, Point lt, Point rb)
             {
                 Point res = new Point(-1, -1);
 
-                if (lt.Equals(rb) || (lt.X == rb.X || lt.Y == rb.Y))
-                    res = lt;
+                if (s.Equals(e))
+                    res = s;
                 else
                 {
-                    res.X = lt.X + Constants.Player_Width;
-                    res.Y = lt.Y + Constants.Player_Height;
+                    if (lt.X == rb.X)
+                        if (lt.X == e.X)
+                            res = lt;
+                        else
+                        {
+                            res.X = (e.X + rb.X) / 2 / Constants.Player_Width * Constants.Player_Width;
+                            res.Y = (e.Y + lt.Y) / 2 / Constants.Player_Height * Constants.Player_Height;
+                        }
+                    else if (lt.Y == rb.Y)
+                        if (lt.Y == e.Y)
+                            res = lt;
+                        else
+                        {
+                            res.X = (e.X + lt.X) / 2 / Constants.Player_Width * Constants.Player_Width;
+                            res.Y = (e.Y + rb.Y) / 2 / Constants.Player_Height * Constants.Player_Height;
+                        }
+                    else
+                    {
+                        res.X = lt.X + Constants.Player_Width;
+                        res.Y = lt.Y + Constants.Player_Height;
+                    }
                 }
                 return res;
             }
@@ -152,6 +173,13 @@ namespace Hopscotch
             public void CheckLeftTop(Point p)
             {
                 SolidBrush sb = new SolidBrush(Color.Blue);
+                g.FillRectangle(sb, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
+
+            }
+
+            public void CheckInnerPoint(Point p)
+            {
+                SolidBrush sb = new SolidBrush(Color.Green);
                 g.FillRectangle(sb, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
 
             }
@@ -213,16 +241,6 @@ namespace Hopscotch
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(0,0);
 
-            /*
-            board = new Board(new Point(this.Left + 12, this.Top + this.Height - this.ClientRectangle.Height + 8));
-            this.Controls.Add(board.panel_board);
-            //board.DarwBorder();
-
-            player = new Player(new Point(0, 0)); // Start Point
-            */
-
-            
-
             btn_start = new Button();
             btn_start.Size = new Size(100, 100);
             btn_start.Location = new Point(this.Size.Width/2, this.Size.Height/2);
@@ -267,22 +285,26 @@ namespace Hopscotch
 
                 if (board.GetBoard(player.prev) == Constants.Area && board.GetBoard(player.cur) == Constants.Empty)
                 {
-                    player.start = true;
+                    player.start = player.cur;
+                    player.draw = true;
                     player.left_top = new Point(Constants.Board_Width, Constants.Board_Height);
                     player.right_bottom = new Point(0, 0);
                 }
 
-                if(player.start)
+                if(player.draw)
                 {
                     if (board.GetBoard(player.cur) == Constants.Area)
                     {
-                        Point innerpoint = board.GetInnerPoint(player.left_top, player.right_bottom);
+                        player.end = player.prev;
+
+                        Point innerpoint = board.GetInnerPoint(player.start, player.end, player.left_top, player.right_bottom);
 
                         board.CheckLeftTop(player.left_top);
                         board.CheckRightBottom(player.right_bottom);
+                        board.CheckInnerPoint(innerpoint);
 
                         board.FillArea(innerpoint);
-                        player.start = false;
+                        player.draw = false;
                     }
                     player.UpdateLeftTop();
                     player.UpdateRightBottom();
