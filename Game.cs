@@ -56,11 +56,12 @@ namespace Hopscotch
             Color[] color = { Color.Black, Color.Red, Color.Gray, Color.White }; // Empty, Path, Area, Player
             SolidBrush[] brush = new SolidBrush[4];
             int[,] board;
+            int board_row, board_col;
 
             public Board(Point p)
             {
-                int board_row = Constants.Board_Height / Constants.Player_Height;
-                int board_col = Constants.Board_Width / Constants.Player_Width;
+                board_row = Constants.Board_Height / Constants.Player_Height;
+                board_col = Constants.Board_Width / Constants.Player_Width;
                 panel_board = new Panel();
                 panel_board.Size = new Size(Constants.Board_Width, Constants.Board_Height);
                 panel_board.Location = new Point(0, 0);
@@ -75,6 +76,30 @@ namespace Hopscotch
 
                 for (int i = 0; i < 4; i++)
                     brush[i] = new SolidBrush(color[i]);
+            }
+
+            public void DarwBorder()
+            {
+                Point tmp = new Point(0, 0);
+                for (int i = 0; i < board_col; i++)
+                {
+                    tmp.X = i * Constants.Player_Width;
+
+                    tmp.Y = 0;
+                    DrawRect(tmp, Constants.Area);
+                    tmp.Y = Constants.Board_Height - Constants.Player_Height;
+                    DrawRect(tmp, Constants.Area);
+                }
+                for (int i = 0; i < board_row; i++)
+                {
+                    tmp.Y = i * Constants.Player_Height;
+
+                    tmp.X = 0;
+                    DrawRect(tmp, Constants.Area);
+                    tmp.X = Constants.Board_Width - Constants.Player_Width;
+                    DrawRect(tmp, Constants.Area);
+                }
+
             }
 
             public void DrawRect(Point p, int val)
@@ -178,6 +203,7 @@ namespace Hopscotch
 
         Player player;
         Board board;
+        Button btn_start;
 
         public Game()
         {
@@ -187,20 +213,45 @@ namespace Hopscotch
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(0,0);
 
+            /*
             board = new Board(new Point(this.Left + 12, this.Top + this.Height - this.ClientRectangle.Height + 8));
             this.Controls.Add(board.panel_board);
-            board.DrawRect(new Point(0,0), Constants.Area);
+            //board.DarwBorder();
 
             player = new Player(new Point(0, 0)); // Start Point
+            */
 
-            KeyPreview = true;
-            this.KeyDown += Key_Down;
+            
+
+            btn_start = new Button();
+            btn_start.Size = new Size(100, 100);
+            btn_start.Location = new Point(this.Size.Width/2, this.Size.Height/2);
+            btn_start.Text = "START";
+            btn_start.Click += new EventHandler(BtnStartClick);
+            this.Controls.Add(btn_start);
 
             this.Show();
         }
 
+        void BtnStartClick(Object sender, EventArgs e)
+        {
+            btn_start.Visible = false;
+
+            board = new Board(new Point(this.Left + 12, this.Top + this.Height - this.ClientRectangle.Height + 8));
+            this.Controls.Add(board.panel_board);
+            board.DarwBorder();
+
+            player = new Player(new Point(0, 0)); // Start Point
+            board.DrawPlayer(player.cur);
+
+            KeyPreview = true;
+            this.KeyDown += Key_Down;
+        }
+
         private void Key_Down(object sender, KeyEventArgs e)
         {
+            board.DarwBorder();
+
             if (e.KeyCode == Keys.A || e.KeyCode == Keys.D || e.KeyCode == Keys.S || e.KeyCode == Keys.W)
             {
                 player.prev = player.cur;
