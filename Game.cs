@@ -28,6 +28,8 @@ namespace Hopscotch
             public Point cur;
             public Point prev;
             public Point left_top;
+            public Point right_bottom;
+            public bool start;
             
             public Player(Point p)
             {
@@ -38,6 +40,12 @@ namespace Hopscotch
             {
                 if (cur.X <= left_top.X && cur.Y <= left_top.Y)
                     left_top = cur;
+            }
+
+            public void UpdateRightBottom()
+            {
+                if (cur.X >= right_bottom.X && cur.Y >= right_bottom.Y)
+                    right_bottom = cur;
             }
         }
 
@@ -95,23 +103,41 @@ namespace Hopscotch
                 return board[i, j];
             }
 
-            public Point GetInnerPoint(Point p)
+            public Point GetInnerPoint(Point lt, Point rb)
             {
                 Point res = new Point(-1, -1);
 
-                if(GetBoard(new Point(p.X+ Constants.Player_Width, p.Y)) != Constants.Empty && GetBoard(new Point(p.X, p.Y+ Constants.Player_Height)) != Constants.Empty)
+                if (lt.Equals(rb) || (lt.X == rb.X || lt.Y == rb.Y))
+                    res = lt;
+                else
                 {
-                    res.X = p.X + Constants.Player_Width;
-                    res.Y = p.Y + Constants.Player_Height;
+                    res.X = lt.X + Constants.Player_Width;
+                    res.Y = lt.Y + Constants.Player_Height;
                 }
                 return res;
             }
 
-            public void CheckInnerPoint(Point p)
+            public void CheckRightBottom(Point p)
             {
                 SolidBrush sb = new SolidBrush(Color.Yellow);
                 g.FillRectangle(sb, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
 
+            }
+
+            public void CheckLeftTop(Point p)
+            {
+                SolidBrush sb = new SolidBrush(Color.Blue);
+                g.FillRectangle(sb, new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
+
+            }
+
+            public void FillPath(Point p)
+            {
+                if (p.X < 0 || p.X >= Constants.Board_Width || p.Y < 0 || p.Y >= Constants.Board_Height)
+                    return;
+
+                if (GetBoard(p) == Constants.Path)
+                    FillArea(p);
             }
 
             public void FillArea(Point p)
@@ -126,22 +152,11 @@ namespace Hopscotch
                     case Constants.Area: return;
                     case Constants.Path:
                         {
-                            Point tmp = p;
-
                             DrawRect(p, Constants.Area);
-                            tmp.X = p.X - Constants.Player_Width;
-                            if (GetBoard(tmp) == Constants.Path)
-                                FillArea(tmp); // left
-                            tmp.X = p.X + Constants.Player_Width;
-                            if (GetBoard(tmp) == Constants.Path)
-                                FillArea(tmp); // right
-                            tmp.X = p.X;
-                            tmp.Y = p.Y - Constants.Player_Height;
-                            if (GetBoard(tmp) == Constants.Path)
-                                FillArea(tmp); // up
-                            tmp.Y = p.Y + Constants.Player_Height;
-                            if (GetBoard(tmp) == Constants.Path)
-                                FillArea(tmp); // down
+                            FillPath(new Point(p.X - Constants.Player_Width, p.Y)); // left
+                            FillPath(new Point(p.X + Constants.Player_Width, p.Y)); // right
+                            FillPath(new Point(p.X, p.Y - Constants.Player_Height)); // up
+                            FillPath(new Point(p.X, p.Y + Constants.Player_Height)); // down
                             break;
                         }
                     case Constants.Empty:
@@ -198,19 +213,28 @@ namespace Hopscotch
                 }
                 board.DrawRect(player.prev, Constants.Path);
                 board.DrawPlayer(player.cur);
-                player.UpdateLeftTop();
-                if (board.GetBoard(player.cur) == Constants.Area)
+
+                if (board.GetBoard(player.prev) == Constants.Area && board.GetBoard(player.cur) == Constants.Empty)
                 {
-                    Point innerpoint = board.GetInnerPoint(player.left_top);
-                    //board.CheckInnerPoint(innerpoint);
-                    //MessageBox.Show("dd");
-                    if (!innerpoint.Equals(new Point(-1, -1)))
+                    player.start = true;
+                    player.left_top = new Point(Constants.Board_Width, Constants.Board_Height);
+                    player.right_bottom = new Point(0, 0);
+                }
+
+                if(player.start)
+                {
+                    if (board.GetBoard(player.cur) == Constants.Area)
                     {
-                        //board.CheckInnerPoint(innerpoint);
-                        //MessageBox.Show("dd");
+                        Point innerpoint = board.GetInnerPoint(player.left_top, player.right_bottom);
+
+                        board.CheckLeftTop(player.left_top);
+                        board.CheckRightBottom(player.right_bottom);
+
                         board.FillArea(innerpoint);
-                        player.left_top = player.cur;
+                        player.start = false;
                     }
+                    player.UpdateLeftTop();
+                    player.UpdateRightBottom();
                 }
             }
         }
