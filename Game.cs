@@ -24,9 +24,9 @@ namespace Hopscotch
             public const int Player = 3;
             public const int Monster = 4;
 
-            public const int MonsterCnt = 1;
+            public const int MonsterCnt = 5;
 
-            public const double Speed = 10;
+            public const double Speed = 20;
         }
 
         class Player
@@ -243,6 +243,7 @@ namespace Hopscotch
 
         class Monster
         {
+            System.Timers.Timer timer;
             Random rand_p;
             Random rand_d;
             Board board;
@@ -252,8 +253,8 @@ namespace Hopscotch
 
             public Monster(Board board)
             {
-                Random rand_p = new Random();
-                Random rand_d = new Random();
+                rand_p = new Random();
+                rand_d = new Random();
 
                 this.board = board;
                 mcnt = Constants.MonsterCnt;
@@ -265,8 +266,7 @@ namespace Hopscotch
                     RandDirec(rand_d, ref direc[i]);
                 }
 
-                System.Timers.Timer timer = new System.Timers.Timer();
-                //timer = new System.Timers.Timer();
+                timer = new System.Timers.Timer();
                 timer.Interval = 1000 / Constants.Speed; //1sec
                 timer.Elapsed += new System.Timers.ElapsedEventHandler(TimerElapsed);
                 timer.Start();
@@ -289,33 +289,22 @@ namespace Hopscotch
                 return res;
             }
 
-            bool IsReachBoder(Point p)
-            {
-                if (p.X <= 0 || p.X >= Constants.Board_Width - Constants.Player_Width
-                        || p.Y <= 0 || p.Y >= Constants.Board_Height - Constants.Player_Height)
-                    return true;
-                return false;
-            }
-
             void TimerElapsed(object sender, ElapsedEventArgs e)
             {
+                timer.Stop();
                 for (int i = 0; i < mcnt; i++)
                 {
                     board.DrawMonster(cur[i], Constants.Empty);
-                    if(IsReachBoder(GetNextPoint(cur[i], direc[i])))
+                    Point tmp = GetNextPoint(cur[i], direc[i]);
+                    while (board.GetBoard(tmp) == Constants.Area)
                     {
-                        Point tmp;
-                        do
-                        {
-                            RandDirec(rand_d, ref direc[i]);
-                            tmp = GetNextPoint(cur[i], direc[i]);
-                        } while (IsReachBoder(tmp));
-                        cur[i] = tmp;
+                        RandDirec(rand_d, ref direc[i]);
+                        tmp = GetNextPoint(cur[i], direc[i]);
                     }
-                    else
-                        cur[i] = GetNextPoint(cur[i], direc[i]);
+                    cur[i] = tmp;
                     board.DrawMonster(cur[i], Constants.Monster);
                 }
+                timer.Start();
             }
 
             void RandPoint(Random rand, ref Point p)
@@ -327,7 +316,7 @@ namespace Hopscotch
 
             void RandDirec(Random rand, ref int d)
             {
-                d = rand.Next(1, 9);
+                d = rand.Next(1, 9 * 9 * 9) % 8 + 1;
             }
         }
 
