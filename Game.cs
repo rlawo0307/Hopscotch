@@ -130,7 +130,47 @@ namespace Hopscotch
                 return board[i, j];
             }
 
-            public Point GetInnerPoint(Point s, Point e, Point lt, Point rb)
+            Point ChangeLeftTop(Point p)
+            {
+                Point left = p, right = p; ;
+                int leftcnt = 0, rightcnt = 0;
+                while (GetBoard(new Point(left.X - Constants.Player_Width, left.Y)) == Constants.Empty)
+                {
+                    left.X -= Constants.Player_Width;
+                    leftcnt++;
+                }
+                while (GetBoard(new Point(right.X - Constants.Player_Width, right.Y)) == Constants.Empty)
+                {
+                    right.X -= Constants.Player_Width;
+                    rightcnt++;
+                }
+                if (leftcnt < rightcnt)
+                    return left;
+                else
+                    return right;
+            }
+
+            Point ChangeRightBottom(Point p)
+            {
+                Point left = p, right = p; ;
+                int leftcnt = 0, rightcnt = 0;
+                while (GetBoard(new Point(left.X - Constants.Player_Width, left.Y)) == Constants.Empty)
+                {
+                    left.X -= Constants.Player_Width;
+                    leftcnt++;
+                }
+                while (GetBoard(new Point(right.X - Constants.Player_Width, right.Y)) == Constants.Empty)
+                {
+                    right.X -= Constants.Player_Width;
+                    rightcnt++;
+                }
+                if (leftcnt < rightcnt)
+                    return left;
+                else
+                    return right;
+            }
+
+            public Point GetInnerPoint(Point s, Point e, ref Point lt, ref Point rb)
             {
                 Point res = new Point(-1, -1);
 
@@ -140,25 +180,50 @@ namespace Hopscotch
                 {
                     if (lt.X == rb.X)
                         if (lt.X == e.X)
-                            res = lt;
-                        else
                         {
-                            res.X = (e.X + rb.X) / 2 / Constants.Player_Width * Constants.Player_Width;
-                            res.Y = (e.Y + lt.Y) / 2 / Constants.Player_Height * Constants.Player_Height;
+                            Point left = lt, right = lt;
+                            int leftcnt = 0, rightcnt = 0;
+                            while (GetBoard(new Point(left.X - Constants.Player_Width, left.Y)) == Constants.Empty)
+                            {
+                                left.X -= Constants.Player_Width;
+                                leftcnt++;
+                            }
+                            while (GetBoard(new Point(right.X + Constants.Player_Width, right.Y)) == Constants.Empty)
+                            {
+                                right.X += Constants.Player_Width;
+                                rightcnt++;
+                            }
+                            if (leftcnt < rightcnt)
+                                lt.X = left.X;
+                            else
+                                rb.X = right.X;
                         }
+                        else
+                            lt.X = e.X;
                     else if (lt.Y == rb.Y)
                         if (lt.Y == e.Y)
-                            res = lt;
-                        else
                         {
-                            res.X = (e.X + lt.X) / 2 / Constants.Player_Width * Constants.Player_Width;
-                            res.Y = (e.Y + rb.Y) / 2 / Constants.Player_Height * Constants.Player_Height;
+                            Point up = lt, down = lt;
+                            int upcnt = 0, downcnt = 0;
+                            while (GetBoard(new Point(up.X, up.Y - Constants.Player_Height)) == Constants.Empty)
+                            {
+                                up.Y -= Constants.Player_Height;
+                                upcnt++;
+                            }
+                            while (GetBoard(new Point(down.X, down.Y + Constants.Player_Height)) == Constants.Empty)
+                            {
+                                down.Y += Constants.Player_Height;
+                                downcnt++;
+                            }
+                            if (upcnt < downcnt)
+                                lt.Y = up.Y;
+                            else
+                                rb.Y = down.Y;
                         }
-                    else
-                    {
-                        res.X = lt.X + Constants.Player_Width;
-                        res.Y = lt.Y + Constants.Player_Height;
-                    }
+                        else
+                            lt.Y = e.Y;
+                    res.X = (lt.X + rb.X) / 2 / Constants.Player_Width * Constants.Player_Width;
+                    res.Y = (lt.Y + rb.Y) / 2 / Constants.Player_Height * Constants.Player_Height;
                 }
                 return res;
             }
@@ -297,11 +362,12 @@ namespace Hopscotch
                     {
                         player.end = player.prev;
 
-                        Point innerpoint = board.GetInnerPoint(player.start, player.end, player.left_top, player.right_bottom);
+                        Point innerpoint = board.GetInnerPoint(player.start, player.end, ref player.left_top, ref player.right_bottom);
 
                         board.CheckLeftTop(player.left_top);
                         board.CheckRightBottom(player.right_bottom);
                         board.CheckInnerPoint(innerpoint);
+                        MessageBox.Show("dd");
 
                         board.FillArea(innerpoint);
                         player.draw = false;
