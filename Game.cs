@@ -11,15 +11,12 @@ using System.Windows.Forms;
 
 namespace Hopscotch
 {
-    
-
     public partial class Game : Form
     {
         Player player;
         Board board;
         Button btn_start;
         Monster monster;
-        public System.Timers.Timer timer;
 
         public Game()
         {
@@ -54,20 +51,6 @@ namespace Hopscotch
 
             KeyPreview = true;
             this.KeyDown += Key_Down;
-
-            MessageBox.Show("" + board.GetBoard(new Point(0, 10)));
-            timer = new System.Timers.Timer();
-            timer.Interval = 1000 / Constants.Speed; //1sec
-            timer.Elapsed += new System.Timers.ElapsedEventHandler(TimeElapsed);
-            timer.Start();
-        }
-
-        void TimeElapsed(object sender, ElapsedEventArgs e)
-        {
-            timer.Stop();
-            monster.MoveMonster();
-            board.DrawBoard(player.cur);
-            timer.Start();
         }
 
         void Key_Down(object sender, KeyEventArgs e)
@@ -83,6 +66,7 @@ namespace Hopscotch
                     case Keys.W: if (player.cur.Y > 0) player.cur.Y -= Constants.Player_Height; break;
                 }
                 board.UpdateBoard(player.prev, Constants.Path);
+                board.DrawRect(player.cur, Constants.Player);
 
                 if (board.GetBoard(player.prev) == Constants.Area && board.GetBoard(player.cur) == Constants.Empty)
                 {
@@ -114,6 +98,7 @@ namespace Hopscotch
         Graphics g;
         Color[] color = { Color.Black, Color.Red, Color.Gray, Color.Yellow, Color.White }; // Empty, Path, Area, , Monster, Player
         SolidBrush[] brush = new SolidBrush[5];
+        object board_lock;
 
         public Board()
         {
@@ -132,14 +117,8 @@ namespace Hopscotch
             g = panel_board.CreateGraphics();
             for (int i = 0; i < 5; i++)
                 brush[i] = new SolidBrush(color[i]);
-        }
 
-        public void DrawBoard(Point player)
-        {
-            for (int i = 0; i < board_row; i++)
-                for (int j = 0; j < board_col; j++)
-                    g.FillRectangle(brush[board[i, j]], new Rectangle(j * Constants.Player_Height, i * Constants.Player_Width, Constants.Player_Width, Constants.Player_Height));
-            g.FillRectangle(brush[Constants.Player], new Rectangle(player.X, player.Y, Constants.Player_Width, Constants.Player_Height));
+            board_lock = new object();
         }
 
         public void UpdateBoard(Point p, int val)
@@ -148,39 +127,23 @@ namespace Hopscotch
             int j = p.X / Constants.Player_Width;
 
             if (board[i, j] != Constants.Area)
-                board[i, j] = val;
-        }
-
-        public void DarwBorder()
-        {
-            Point tmp = new Point(0, 0);
-            for (int i = 0; i < board_col; i++)
             {
-                tmp.X = i * Constants.Player_Width;
-
-                tmp.Y = 0;
-                UpdateBoard(tmp, Constants.Area);
-                tmp.Y = Constants.Board_Height - Constants.Player_Height;
-                UpdateBoard(tmp, Constants.Area);
+                lock (board_lock)
+                    board[i, j] = val;
+                DrawRect(p, val);
             }
-            for (int i = 0; i < board_row; i++)
-            {
-                tmp.Y = i * Constants.Player_Height;
-
-                tmp.X = 0;
-                UpdateBoard(tmp, Constants.Area);
-                tmp.X = Constants.Board_Width - Constants.Player_Width;
-                UpdateBoard(tmp, Constants.Area);
-            }
-
         }
 
         public int GetBoard(Point p)
         {
             int i = p.Y / Constants.Player_Height;
             int j = p.X / Constants.Player_Width;
+            int res;
 
-            return board[i, j]; ;
+            lock (board_lock)
+                res = board[i, j];
+
+            return res;
         }
 
         public Point GetInnerPoint(Point s, Point e, ref Point lt, ref Point rb)
@@ -284,6 +247,36 @@ namespace Hopscotch
                     }
             }
         }
+
+        public void DarwBorder()
+        {
+            Point tmp = new Point(0, 0);
+            for (int i = 0; i < board_col; i++)
+            {
+                tmp.X = i * Constants.Player_Width;
+
+                tmp.Y = 0;
+                UpdateBoard(tmp, Constants.Area);
+                tmp.Y = Constants.Board_Height - Constants.Player_Height;
+                UpdateBoard(tmp, Constants.Area);
+            }
+            for (int i = 0; i < board_row; i++)
+            {
+                tmp.Y = i * Constants.Player_Height;
+
+                tmp.X = 0;
+                UpdateBoard(tmp, Constants.Area);
+                tmp.X = Constants.Board_Width - Constants.Player_Width;
+                UpdateBoard(tmp, Constants.Area);
+            }
+
+        }
+
+        public void DrawRect(Point p, int val)
+        {
+            lock(board_lock)
+                g.FillRectangle(brush[val], new Rectangle(p.X, p.Y, Constants.Player_Width, Constants.Player_Height));
+        }
     }
 
     class Player
@@ -316,6 +309,7 @@ namespace Hopscotch
 
     class Monster
     {
+        public System.Timers.Timer timer;
         Random rand_p;
         Random rand_d;
         Board board;
@@ -337,6 +331,18 @@ namespace Hopscotch
                 RandPoint(rand_p, ref cur[i]);
                 RandDirec(rand_d, ref direc[i]);
             }
+
+            timer = new System.Timers.Timer();
+            timer.Interval = 1000 / Constants.Speed; //1sec
+            timer.Elapsed += new System.Timers.ElapsedEventHandler(TimeElapsed);
+            timer.Start();
+        }
+
+        void TimeElapsed(object sender, ElapsedEventArgs e)
+        {
+            timer.Stop();
+            MoveMonster();
+            timer.Start();
         }
 
         public void MoveMonster()
