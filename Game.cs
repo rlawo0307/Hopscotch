@@ -62,15 +62,20 @@ namespace Hopscotch
         void TimeElapsed(object sender, ElapsedEventArgs e)
         {
             timer.Stop();
-            if (!monster.game_over)
+            if (board.empty_cnt < Constants.ClearEmptyCnt)
             {
-                monster.MoveMonster();
-                timer.Start();
+                MessageBox.Show("Game Clear");
+                this.Close();
             }
-            else
+            else if (monster.game_over)
             {
                 MessageBox.Show("Game Over");
                 this.Close();
+            }
+            else
+            {
+                monster.MoveMonster();
+                timer.Start();
             }
         }
 
@@ -115,11 +120,13 @@ namespace Hopscotch
     class Board
     {
         public Panel panel_board;
-        int[,] board;
-        int board_row, board_col;
         Graphics g;
         Color[] color = { Color.Black, Color.Gray, Color.Green, Color.Yellow, Color.White, Color.Red }; // Empty, Path, Area, , Monster, Player, Over
         SolidBrush[] brush;
+
+        int[,] board;
+        int board_row, board_col;
+        public int empty_cnt;
         object board_lock;
 
         public Board()
@@ -135,6 +142,7 @@ namespace Hopscotch
             for (int i = 0; i < board_row; i++)
                 for (int j = 0; j < board_col; j++)
                     board[i, j] = Constants.Empty;
+            empty_cnt = board_row * board_col;
 
             g = panel_board.CreateGraphics();
             brush = new SolidBrush[Constants.Colorcnt];
@@ -157,6 +165,9 @@ namespace Hopscotch
                     lock (board_lock)
                         board[i, j] = val;
             DrawRect(p, board[i,j]);
+
+            if (val == Constants.Area)
+                empty_cnt--;
         }
 
         public int GetBoard(Point p)
@@ -433,8 +444,9 @@ namespace Hopscotch
         public const int Over = 5;
 
         public const int Colorcnt = 6;
-        public const int MonsterCnt = 5;
+        public const int MonsterCnt = 2;
 
         public const double Speed = 20;
+        public const int ClearEmptyCnt = 1000;
     }
 }
