@@ -13,6 +13,7 @@ namespace Hopscotch
 {
     public partial class Game : Form
     {
+        public System.Timers.Timer timer;
         Player player;
         Board board;
         Button btn_start;
@@ -51,6 +52,26 @@ namespace Hopscotch
 
             KeyPreview = true;
             this.KeyDown += Key_Down;
+
+            timer = new System.Timers.Timer();
+            timer.Interval = 1000 / Constants.Speed; //1sec
+            timer.Elapsed += new System.Timers.ElapsedEventHandler(TimeElapsed);
+            timer.Start();
+        }
+
+        void TimeElapsed(object sender, ElapsedEventArgs e)
+        {
+            timer.Stop();
+            if (!monster.game_over)
+            {
+                monster.MoveMonster();
+                timer.Start();
+            }
+            else
+            {
+                MessageBox.Show("Game Over");
+                this.Close();
+            }
         }
 
         void Key_Down(object sender, KeyEventArgs e)
@@ -87,6 +108,7 @@ namespace Hopscotch
                     player.UpdateRightBottom();
                 }
             }
+
         }
     }
 
@@ -96,8 +118,8 @@ namespace Hopscotch
         int[,] board;
         int board_row, board_col;
         Graphics g;
-        Color[] color = { Color.Black, Color.Red, Color.Gray, Color.Yellow, Color.White }; // Empty, Path, Area, , Monster, Player
-        SolidBrush[] brush = new SolidBrush[5];
+        Color[] color = { Color.Black, Color.Gray, Color.Green, Color.Yellow, Color.White, Color.Red }; // Empty, Path, Area, , Monster, Player, Over
+        SolidBrush[] brush;
         object board_lock;
 
         public Board()
@@ -115,7 +137,8 @@ namespace Hopscotch
                     board[i, j] = Constants.Empty;
 
             g = panel_board.CreateGraphics();
-            for (int i = 0; i < 5; i++)
+            brush = new SolidBrush[Constants.Colorcnt];
+            for (int i = 0; i < Constants.Colorcnt; i++)
                 brush[i] = new SolidBrush(color[i]);
 
             board_lock = new object();
@@ -126,9 +149,13 @@ namespace Hopscotch
             int i = p.Y / Constants.Player_Height;
             int j = p.X / Constants.Player_Width;
 
-            if (board[i,j] != Constants.Area)
-                lock (board_lock)
+            if (val == Constants.Over)
+                lock(board_lock)
                     board[i, j] = val;
+            else
+                if (board[i,j] != Constants.Area)
+                    lock (board_lock)
+                        board[i, j] = val;
             DrawRect(p, board[i,j]);
         }
 
@@ -307,13 +334,13 @@ namespace Hopscotch
 
     class Monster
     {
-        public System.Timers.Timer timer;
         Random rand_p;
         Random rand_d;
         Board board;
         int mcnt;
         Point[] cur;
         int[] direc;
+        public bool game_over;
 
         public Monster(Board board)
         {
@@ -329,18 +356,7 @@ namespace Hopscotch
                 RandPoint(rand_p, ref cur[i]);
                 RandDirec(rand_d, ref direc[i]);
             }
-
-            timer = new System.Timers.Timer();
-            timer.Interval = 1000 / Constants.Speed; //1sec
-            timer.Elapsed += new System.Timers.ElapsedEventHandler(TimeElapsed);
-            timer.Start();
-        }
-
-        void TimeElapsed(object sender, ElapsedEventArgs e)
-        {
-            timer.Stop();
-            MoveMonster();
-            timer.Start();
+            game_over = false;
         }
 
         public void MoveMonster()
@@ -355,8 +371,23 @@ namespace Hopscotch
                     tmp = GetNextPoint(cur[i], direc[i]);
                 }
                 cur[i] = tmp;
-                board.UpdateBoard(cur[i], Constants.Monster);
+                if (ReachPlayer(tmp))
+                {
+                    board.UpdateBoard(cur[i], Constants.Over);
+                    game_over = true;
+                }
+                else
+                    board.UpdateBoard(cur[i], Constants.Monster);
             }
+        }
+
+        bool ReachPlayer(Point p)
+        {
+            int data = board.GetBoard(p);
+
+            if (data == Constants.Path || data == Constants.Player)
+                return true;
+            return false;
         }
 
         Point GetNextPoint(Point p, int d)
@@ -399,7 +430,9 @@ namespace Hopscotch
         public const int Area = 2;
         public const int Monster = 3;
         public const int Player = 4;
+        public const int Over = 5;
 
+        public const int Colorcnt = 6;
         public const int MonsterCnt = 5;
 
         public const double Speed = 20;

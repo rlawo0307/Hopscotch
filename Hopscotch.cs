@@ -20,7 +20,6 @@ namespace Hopscotch
         private void Btn_Play_Click(object sender, EventArgs e)
         {
             Game gameform = new Game();
-            
         }
 
         private void Btn_Help_Click(object sender, EventArgs e)
