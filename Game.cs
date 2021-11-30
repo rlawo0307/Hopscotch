@@ -16,30 +16,23 @@ namespace Hopscotch
         public System.Timers.Timer timer;
         Player player;
         Board board;
-        Button btn_start;
         Monster monster;
 
         public Game()
         {
             InitializeComponent();
 
+            KeyPreview = true;
+            this.KeyDown += Key_Down;
+
+            timer = new System.Timers.Timer();
+            timer.Interval = 1000 / Constants.Speed; //1sec
+            timer.Elapsed += new System.Timers.ElapsedEventHandler(TimeElapsed);
+
             this.Size = new Size(Constants.Board_Width + 16, Constants.Board_Height + 39);
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(0, 0);
-
-            btn_start = new Button();
-            btn_start.Size = new Size(100, 100);
-            btn_start.Location = new Point(this.Size.Width / 2, this.Size.Height / 2);
-            btn_start.Text = "START";
-            btn_start.Click += new EventHandler(BtnStartClick);
-            this.Controls.Add(btn_start);
-
             this.Show();
-        }
-
-        void BtnStartClick(Object sender, EventArgs e)
-        {
-            btn_start.Visible = false;
 
             board = new Board();
             this.Controls.Add(board.panel_board);
@@ -48,14 +41,8 @@ namespace Hopscotch
             player = new Player(new Point(0, 0)); // Start Point
             board.DrawRect(player.cur, Constants.Player);
 
-            monster = new Monster(board);
+            monster = new Monster(board, 3);
 
-            KeyPreview = true;
-            this.KeyDown += Key_Down;
-
-            timer = new System.Timers.Timer();
-            timer.Interval = 1000 / Constants.Speed; //1sec
-            timer.Elapsed += new System.Timers.ElapsedEventHandler(TimeElapsed);
             timer.Start();
         }
 
@@ -353,13 +340,13 @@ namespace Hopscotch
         int[] direc;
         public bool game_over;
 
-        public Monster(Board board)
+        public Monster(Board board, int n)
         {
             rand_p = new Random();
             rand_d = new Random();
 
             this.board = board;
-            mcnt = Constants.MonsterCnt;
+            mcnt = n;
             cur = new Point[mcnt];
             direc = new int[mcnt];
             for (int i = 0; i < mcnt; i++)
@@ -444,9 +431,14 @@ namespace Hopscotch
         public const int Over = 5;
 
         public const int Colorcnt = 6;
-        public const int MonsterCnt = 2;
 
         public const double Speed = 20;
         public const int ClearEmptyCnt = 1000;
+
+        public const int Stage1Monster = 2;
+        public const int Stage2Monster = 4;
+        public const int Stage3Monster = 6;
+        public const int Stage4Monster = 8;
+        public const int Stage5Monster = 10;
     }
 }
