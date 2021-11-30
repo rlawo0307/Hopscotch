@@ -45,7 +45,7 @@ namespace Hopscotch
             board.DarwBorder();
 
             player = new Player(new Point(0, 0)); // Start Point
-            board.UpdateBoard(player.cur, Constants.Player);
+            board.DrawRect(player.cur, Constants.Player);
 
             monster = new Monster(board);
 
@@ -126,12 +126,10 @@ namespace Hopscotch
             int i = p.Y / Constants.Player_Height;
             int j = p.X / Constants.Player_Width;
 
-            if (board[i, j] != Constants.Area)
-            {
+            if (board[i,j] != Constants.Area)
                 lock (board_lock)
                     board[i, j] = val;
-                DrawRect(p, val);
-            }
+            DrawRect(p, board[i,j]);
         }
 
         public int GetBoard(Point p)
