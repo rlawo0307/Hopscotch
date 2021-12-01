@@ -64,7 +64,7 @@ namespace Hopscotch
             if (board.empty_cnt < Constants.ClearEmptyCnt)
             {
                 MessageBox.Show("Game Clear");
-                if (stage < 5)
+                if (stage < Constants.TotalStage)
                     new Game(mode, stage + 1);
                 else
                 {
@@ -138,9 +138,19 @@ namespace Hopscotch
 
         void Game_Over()
         {
-            MessageBox.Show("Game Over");
-            timer.Dispose();
-            this.Close();
+            if (MessageBox.Show("Game Over\n", "", MessageBoxButtons.RetryCancel) == DialogResult.Retry)
+            {
+                /*
+                this.Visible = false;
+                new Game(mode, stage);
+                //this.Close();
+                */
+            }
+            else
+            {
+                timer.Dispose();
+                this.Close();
+            }
         }
     }
 
@@ -445,10 +455,12 @@ namespace Hopscotch
         public const int Over = 5;
 
         public const int Colorcnt = 6;
+        public const int MonsterCnt = 3;
+        public const int TotalStage = 10;
 
         public const double Speed = 10;
         public const int ClearEmptyCnt = 1000;
 
-        public const int MonsterCnt = 3;
+        
     }
 }
