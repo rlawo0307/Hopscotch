@@ -26,7 +26,7 @@ namespace Hopscotch
             this.KeyDown += Key_Down;
 
             timer = new System.Timers.Timer();
-            timer.Interval = 1000 / Constants.Speed; //1sec
+            timer.Interval = 1000 / (Constants.Speed + stage*10);
             timer.Elapsed += new System.Timers.ElapsedEventHandler(TimeElapsed);
 
             this.Size = new Size(Constants.Board_Width + 16, Constants.Board_Height + 39);
@@ -434,13 +434,7 @@ namespace Hopscotch
 
         public const int Colorcnt = 6;
 
-        public const double Speed = 20;
+        public const double Speed = 10;
         public const int ClearEmptyCnt = 1000;
-
-        public const int Stage1Monster = 2;
-        public const int Stage2Monster = 4;
-        public const int Stage3Monster = 6;
-        public const int Stage4Monster = 8;
-        public const int Stage5Monster = 10;
     }
 }

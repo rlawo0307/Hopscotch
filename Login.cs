@@ -15,6 +15,18 @@ namespace Hopscotch
         public Login()
         {
             InitializeComponent();
+
+            this.Show();
+        }
+
+        private void btn_start_Click(object sender, EventArgs e)
+        {
+            String ID = textBox_id.Text;
+            int stage = comboBox_stage.SelectedIndex;
+            Game game;
+
+            if (!(ID.Equals("") || stage == -1))
+                game = new Game(stage);
         }
     }
 }
