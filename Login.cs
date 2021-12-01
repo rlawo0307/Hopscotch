@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace Hopscotch
 {
-    public partial class Setting : Form
+    public partial class Login : Form
     {
-        public Setting()
+        public Login()
         {
             InitializeComponent();
         }
