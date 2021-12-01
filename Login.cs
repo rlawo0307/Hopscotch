@@ -22,11 +22,11 @@ namespace Hopscotch
         private void btn_start_Click(object sender, EventArgs e)
         {
             String ID = textBox_id.Text;
-            int stage = comboBox_stage.SelectedIndex;
+            int mode = comboBox_stage.SelectedIndex;
             Game game;
 
-            if (!(ID.Equals("") || stage == -1))
-                game = new Game(stage);
+            if (!(ID.Equals("") || mode == -1))
+                game = new Game(mode, 1);
         }
     }
 }
