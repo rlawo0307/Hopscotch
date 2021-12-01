@@ -20,6 +20,7 @@ namespace Hopscotch
         private void Btn_Play_Click(object sender, EventArgs e)
         {
             this.Visible = false;
+            MessageBox.Show("dd");
 
             /*
             Btn_Play.Visible = false;
