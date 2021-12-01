@@ -14,7 +14,7 @@ namespace Hopscotch
     public partial class Game : Form
     {
         public System.Timers.Timer timer;
-        int mode, stage;
+        int stage;
         Player player;
         Board board;
         Monster[] monster;
@@ -24,7 +24,6 @@ namespace Hopscotch
         {
             InitializeComponent();
 
-            this.mode = mode;
             this.stage = stage;
 
             KeyPreview = true;
@@ -37,24 +36,25 @@ namespace Hopscotch
             this.Size = new Size(Constants.Board_Width + 16, Constants.Board_Height + 39);
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(0, 0);
-            this.Show();
 
             board = new Board();
             this.Controls.Add(board.panel_board);
+
+            player = new Player();
+        }
+
+        public void GameStart()
+        {
+            this.Show();
             board.DarwBorder();
-
-            player = new Player(new Point(0, 0)); // Start Point
             board.DrawRect(player.cur, Constants.Player, player.size);
-
             monstercnt = Constants.MonsterCnt;
             for (int i = 2; i <= stage; i++)
                 monstercnt += 2;
             monster = new Monster[monstercnt];
-
             Random rand = new Random();
             for (int i = 0; i < monstercnt; i++)
                 monster[i] = new Monster(rand);
-
             timer.Start();
         }
 
@@ -63,11 +63,16 @@ namespace Hopscotch
             timer.Stop();
             if (board.empty_cnt < Constants.ClearEmptyCnt)
             {
-                MessageBox.Show("Game Clear");
                 if (stage < Constants.TotalStage)
-                    new Game(mode, stage + 1);
-                else
                 {
+                    MessageBox.Show("Stage Clear");
+                    InitStage();
+                    stage++;
+                    GameStart();
+                }
+                else if (stage == Constants.TotalStage)
+                {
+                    MessageBox.Show("Game Clear");
                     timer.Dispose();
                     this.Close();
                 }
@@ -140,17 +145,22 @@ namespace Hopscotch
         {
             if (MessageBox.Show("Game Over\n", "", MessageBoxButtons.RetryCancel) == DialogResult.Retry)
             {
-                /*
-                this.Visible = false;
-                new Game(mode, stage);
-                //this.Close();
-                */
+                InitStage();
+                GameStart();
             }
             else
             {
                 timer.Dispose();
                 this.Close();
             }
+        }
+
+        void InitStage()
+        {
+            board.InitBoard();
+            player.InitPlayer();
+            for (int i = 0; i < monstercnt; i++)
+                monster[i].InitMonster();
         }
     }
 
@@ -173,13 +183,9 @@ namespace Hopscotch
             panel_board = new Panel();
             panel_board.Size = new Size(Constants.Board_Width, Constants.Board_Height);
             panel_board.Location = new Point(0, 0);
-            panel_board.BackColor = Color.Black;
+            panel_board.BackColor = color[Constants.Empty];
 
             board = new int[board_row, board_col];
-            for (int i = 0; i < board_row; i++)
-                for (int j = 0; j < board_col; j++)
-                    board[i, j] = Constants.Empty;
-            empty_cnt = board_row * board_col;
 
             g = panel_board.CreateGraphics();
             brush = new SolidBrush[Constants.Colorcnt];
@@ -187,6 +193,43 @@ namespace Hopscotch
                 brush[i] = new SolidBrush(color[i]);
 
             board_lock = new object();
+
+            InitBoard();
+        }
+
+        public void InitBoard()
+        {
+            for (int i = 0; i < board_row; i++)
+                for (int j = 0; j < board_col; j++)
+                    board[i, j] = Constants.Empty;
+            DrawRect(new Point(0, 0), Constants.Empty, new Size(Constants.Board_Width, Constants.Board_Height));
+            empty_cnt = (board_row-2) * (board_col-2);
+        }
+
+        public void DarwBorder()
+        {
+            Point tmp = new Point(0, 0);
+            Size blocksize = new Size(Constants.Block_Width, Constants.Block_Height);
+
+            for (int i = 0; i < board_col; i++)
+            {
+                tmp.X = i * Constants.Block_Width;
+
+                tmp.Y = 0;
+                UpdateBoard(tmp, Constants.Area, blocksize);
+                tmp.Y = Constants.Board_Height - Constants.Block_Height;
+                UpdateBoard(tmp, Constants.Area, blocksize);
+            }
+            for (int i = 0; i < board_row; i++)
+            {
+                tmp.Y = i * Constants.Block_Height;
+
+                tmp.X = 0;
+                UpdateBoard(tmp, Constants.Area, blocksize);
+                tmp.X = Constants.Board_Width - Constants.Block_Width;
+                UpdateBoard(tmp, Constants.Area, blocksize);
+            }
+
         }
 
         public void UpdateBoard(Point p, int val, Size size)
@@ -322,32 +365,6 @@ namespace Hopscotch
             }
         }
 
-        public void DarwBorder()
-        {
-            Point tmp = new Point(0, 0);
-            Size blocksize = new Size(Constants.Block_Width, Constants.Block_Height);
-
-            for (int i = 0; i < board_col; i++)
-            {
-                tmp.X = i * Constants.Block_Width;
-
-                tmp.Y = 0;
-                UpdateBoard(tmp, Constants.Area, blocksize);
-                tmp.Y = Constants.Board_Height - Constants.Block_Height;
-                UpdateBoard(tmp, Constants.Area, blocksize);
-            }
-            for (int i = 0; i < board_row; i++)
-            {
-                tmp.Y = i * Constants.Block_Height;
-
-                tmp.X = 0;
-                UpdateBoard(tmp, Constants.Area, blocksize);
-                tmp.X = Constants.Board_Width - Constants.Block_Width;
-                UpdateBoard(tmp, Constants.Area, blocksize);
-            }
-
-        }
-
         public void DrawRect(Point p, int val, Size size)
         {
             lock (board_lock)
@@ -366,10 +383,16 @@ namespace Hopscotch
         public Size size;
         public bool draw;
 
-        public Player(Point p)
+        public Player()
         {
-            prev = cur = left_top = p;
             size = new Size(Constants.Block_Width, Constants.Block_Height);
+            InitPlayer();
+        }
+
+        public void InitPlayer()
+        {
+            cur = prev = new Point(Constants.StartX, Constants.StartY);
+            draw = false;
         }
 
         public void UpdateLeftTop()
@@ -395,10 +418,8 @@ namespace Hopscotch
         public Monster(Random rand)
         {
             this.rand = rand;
-
-            RandPoint();
-            RandDirec(ref direc);
             size = new Size(Constants.Monster_Width, Constants.Monster_Height);
+            InitMonster();
             /*
             if (n == totalcnt - 1)
                 size = new Size(Constants.Boss_Width, Constants.Boss_Height);
@@ -406,6 +427,12 @@ namespace Hopscotch
                 size = new Size(Constants.Monster_Width, Constants.Monster_Height);
             */
             //game_over = false;
+        }
+
+        public void InitMonster()
+        {
+            RandPoint();
+            RandDirec(ref direc);
         }
 
         public Point GetNextPoint(int d)
@@ -456,11 +483,12 @@ namespace Hopscotch
 
         public const int Colorcnt = 6;
         public const int MonsterCnt = 3;
-        public const int TotalStage = 10;
+        public const int TotalStage = 2;
 
         public const double Speed = 10;
         public const int ClearEmptyCnt = 1000;
 
-        
+        public const int StartX = 0;
+        public const int StartY = 0;
     }
 }
