@@ -18,7 +18,7 @@ namespace Hopscotch
         Board board;
         Monster monster;
 
-        public Game()
+        public Game(int stage)
         {
             InitializeComponent();
 
@@ -420,6 +420,8 @@ namespace Hopscotch
 
     static class Constants
     {
+        //public const String MainImage = "./res/Image/Main.bmp";
+
         public const int Board_Width = 600, Board_Height = 500;
         public const int Player_Width = 10, Player_Height = 10;
 

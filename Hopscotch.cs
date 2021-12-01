@@ -19,47 +19,29 @@ namespace Hopscotch
 
         private void Btn_Play_Click(object sender, EventArgs e)
         {
-            Game gameform = new Game();
-        }
+            this.Visible = false;
 
-        private void Btn_Help_Click(object sender, EventArgs e)
-        {
-            Help helpform = new Help();
-            helpform.ShowDialog();
-        }
+            /*
+            Btn_Play.Visible = false;
 
-        private void Btn_Setting_Click(object sender, EventArgs e)
-        {
-            Setting settingform = new Setting();
-            settingform.ShowDialog();
-        }
+            TextBox Tb_Id = new TextBox();
+            Tb_Id.Size = new Size(100, 100);
+            Tb_Id.Location = new Point(10, 10);
+            Tb_Id.Text = "ID : ";
+            this.Controls.Add(Tb_Id);
 
-        private void Btn_Load_Click(object sender, EventArgs e)
-        {
-            ShowFileOpenDialog();
-        }
-
-        private string ShowFileOpenDialog()
-        {
-            //파일 오픈창 생성 및 설정
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Title = "파일 선택";
-            ofd.FileName = ".jpg";
-            ofd.Filter = "Image File (*.jpg,*.gif, *.bmp) | *.jpg, *.gif, *bmp | 모든 파일 (*.*) | *.*";
-
-            //파일 오픈창 로드
-            DialogResult dr = ofd.ShowDialog();
-
-            if (dr == DialogResult.OK)
+            ComboBox stage = new ComboBox();
+            stage.Text = "(Select Stage)";
+            for (int i = 0; i < 5; i++)
             {
-                string fileName = ofd.SafeFileName;
-                string fileFullName = ofd.FileName;
-                string filePath = fileFullName.Replace(fileName, "");
+                String str = "Stage ";
+                stage.Items.Add(str + (i+1));
             }
-            else if (dr == DialogResult.Cancel)
-                return "";
-            return "";
-
-        }
+            stage.Size = new Size(150, 100);
+            stage.Location = new Point(Btn_Play.Location.X, Btn_Play.Location.Y + Btn_Play.Height + 10);
+            this.Controls.Add(stage);
+            */
+            
+        }      
     }
 }

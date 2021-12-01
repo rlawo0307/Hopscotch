@@ -30,14 +30,11 @@ namespace Hopscotch
         private void InitializeComponent()
         {
             this.Btn_Play = new System.Windows.Forms.Button();
-            this.Btn_Help = new System.Windows.Forms.Button();
-            this.Btn_Setting = new System.Windows.Forms.Button();
-            this.Btn_Load = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // Btn_Play
             // 
-            this.Btn_Play.Location = new System.Drawing.Point(153, 262);
+            this.Btn_Play.Location = new System.Drawing.Point(328, 277);
             this.Btn_Play.Name = "Btn_Play";
             this.Btn_Play.Size = new System.Drawing.Size(75, 49);
             this.Btn_Play.TabIndex = 0;
@@ -45,47 +42,14 @@ namespace Hopscotch
             this.Btn_Play.UseVisualStyleBackColor = true;
             this.Btn_Play.Click += new System.EventHandler(this.Btn_Play_Click);
             // 
-            // Btn_Help
-            // 
-            this.Btn_Help.Location = new System.Drawing.Point(275, 262);
-            this.Btn_Help.Name = "Btn_Help";
-            this.Btn_Help.Size = new System.Drawing.Size(75, 49);
-            this.Btn_Help.TabIndex = 1;
-            this.Btn_Help.Text = "HELP";
-            this.Btn_Help.UseVisualStyleBackColor = true;
-            this.Btn_Help.Click += new System.EventHandler(this.Btn_Help_Click);
-            // 
-            // Btn_Setting
-            // 
-            this.Btn_Setting.Location = new System.Drawing.Point(418, 262);
-            this.Btn_Setting.Name = "Btn_Setting";
-            this.Btn_Setting.Size = new System.Drawing.Size(97, 49);
-            this.Btn_Setting.TabIndex = 2;
-            this.Btn_Setting.Text = "SETTING";
-            this.Btn_Setting.UseVisualStyleBackColor = true;
-            this.Btn_Setting.Click += new System.EventHandler(this.Btn_Setting_Click);
-            // 
-            // Btn_Load
-            // 
-            this.Btn_Load.Location = new System.Drawing.Point(33, 262);
-            this.Btn_Load.Name = "Btn_Load";
-            this.Btn_Load.Size = new System.Drawing.Size(75, 49);
-            this.Btn_Load.TabIndex = 3;
-            this.Btn_Load.Text = "Load";
-            this.Btn_Load.UseVisualStyleBackColor = true;
-            this.Btn_Load.Click += new System.EventHandler(this.Btn_Load_Click);
-            // 
             // Hopscotch
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.Btn_Load);
-            this.Controls.Add(this.Btn_Setting);
-            this.Controls.Add(this.Btn_Help);
             this.Controls.Add(this.Btn_Play);
             this.Name = "Hopscotch";
-            this.Text = "Menu";
+            this.Text = "Hopscotch";
             this.ResumeLayout(false);
 
         }
@@ -93,9 +57,6 @@ namespace Hopscotch
         #endregion
 
         private System.Windows.Forms.Button Btn_Play;
-        private System.Windows.Forms.Button Btn_Help;
-        private System.Windows.Forms.Button Btn_Setting;
-        private System.Windows.Forms.Button Btn_Load;
     }
 }
 
