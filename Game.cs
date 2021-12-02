@@ -108,16 +108,10 @@ namespace Hopscotch
         {
             if (e.KeyCode == Keys.A || e.KeyCode == Keys.D || e.KeyCode == Keys.S || e.KeyCode == Keys.W)
             {
-                player.prev = player.cur;
-                switch (e.KeyCode)
-                {
-                    case Keys.A: if (player.cur.X > 0) player.cur.X -= Constants.Block_Width; break;
-                    case Keys.D: if (player.cur.X + Constants.Block_Width < Constants.Board_Width) player.cur.X += Constants.Block_Width; break;
-                    case Keys.S: if (player.cur.Y + Constants.Block_Height < Constants.Board_Height) player.cur.Y += Constants.Block_Height; break;
-                    case Keys.W: if (player.cur.Y > 0) player.cur.Y -= Constants.Block_Height; break;
-                }
+                player.Move(e.KeyCode);
                 board.UpdateBoard(player.prev, Constants.Path, player.size);
                 board.DrawRect(player.cur, Constants.Player, player.size);
+                board.DrawPlayer();D
 
                 if (board.GetBoard(player.prev) == Constants.Area && board.GetBoard(player.cur) == Constants.Empty)
                 {
@@ -168,8 +162,9 @@ namespace Hopscotch
     {
         public Panel panel_board;
         Graphics g;
-        Color[] color = { Color.Black, Color.Gray, Color.Green, Color.Yellow, Color.White, Color.Red }; // Empty, Path, Area, , Monster, Player, Over
+        Color[] color = { Color.Black, Color.Red, Color.Green, Color.Yellow, Color.White, Color.Gray }; // Empty, Path, Area, , Monster, Player, Over
         SolidBrush[] brush;
+        Pen pen;
 
         int[,] board;
         int board_row, board_col;
@@ -191,6 +186,7 @@ namespace Hopscotch
             brush = new SolidBrush[Constants.Colorcnt];
             for (int i = 0; i < Constants.Colorcnt; i++)
                 brush[i] = new SolidBrush(color[i]);
+            pen = new Pen(color[Constants.Path]);
 
             board_lock = new object();
 
@@ -370,18 +366,39 @@ namespace Hopscotch
             lock (board_lock)
                 g.FillRectangle(brush[val], new Rectangle(p.X, p.Y, size.Width, size.Height));
         }
+
+        public void DrawPlayer(Point p, Keys d, Size size)
+        {
+            lock (board_lock)
+            {
+                g.FillRectangle(brush[Constants.Player], new Rectangle(p.X, p.Y, size.Width, size.Height));
+                switch(d)
+                {
+                    case Constants.Left:  break;
+                    case Constants.Right: break;
+                    case Constants.Down: break;
+                        
+                    case Constants.Up: break;
+                }
+                g.DrawLine(pen, );
+            }
+        }
     }
 
     class Player
     {
         public Point cur;
         public Point prev;
+        public Keys direc;
+
         public Point start;
         public Point end;
         public Point left_top;
         public Point right_bottom;
         public Size size;
+
         public bool draw;
+        
 
         public Player()
         {
@@ -392,6 +409,7 @@ namespace Hopscotch
         public void InitPlayer()
         {
             cur = prev = new Point(Constants.StartX, Constants.StartY);
+            direc = 0;
             draw = false;
         }
 
@@ -405,6 +423,23 @@ namespace Hopscotch
         {
             if (cur.X >= right_bottom.X && cur.Y >= right_bottom.Y)
                 right_bottom = cur;
+        }
+
+        public void Move(Keys key)
+        {
+            if (direc != key)
+                direc = key;
+            else
+            {
+                prev = cur;
+                switch (key)
+                {
+                    case Constants.Left: if (cur.X > 0) cur.X -= Constants.Block_Width; break;
+                    case Constants.Right: if (cur.X + Constants.Block_Width < Constants.Board_Width) cur.X += Constants.Block_Width; break;
+                    case Constants.Down: if (cur.Y + Constants.Block_Height < Constants.Board_Height) cur.Y += Constants.Block_Height; break;
+                    case Constants.Up: if (cur.Y > 0) cur.Y -= Constants.Block_Height; break;
+                }
+            }
         }
     }
 
@@ -480,6 +515,11 @@ namespace Hopscotch
         public const int Monster = 3;
         public const int Player = 4;
         public const int Over = 5;
+
+        public const Keys Left = Keys.A;
+        public const Keys Right = Keys.D;
+        public const Keys Down = Keys.S;
+        public const Keys Up = Keys.W;
 
         public const int Colorcnt = 6;
         public const int MonsterCnt = 3;
