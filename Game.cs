@@ -21,7 +21,7 @@ namespace Hopscotch
         int monstercnt;
         int remainmonster;
 
-        public Game(int mode, int stage)
+        public Game(String ID, int mode, int stage)
         {
             InitializeComponent();
 
@@ -34,7 +34,7 @@ namespace Hopscotch
             timer.Interval = 1000 / (Constants.Speed + mode * 10);
             timer.Elapsed += new System.Timers.ElapsedEventHandler(TimeElapsed);
 
-            this.Size = new Size(Constants.Board_Width + 16, Constants.Board_Height + 39);
+            this.Size = new Size(Constants.Board_Width + 16, Constants.Board_Height + 90);
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(0, 0);
 
@@ -42,11 +42,17 @@ namespace Hopscotch
             this.Controls.Add(board.panel_board);
 
             player = new Player();
+            player.ID = ID;
         }
 
         public void GameStart()
         {
+            label_ID.Text = "ID : " + player.ID;
+            label_stage.Text = "< STAGE " + stage + " >";
+            label_chance.Text = "♥ : " + player.chance;
+            
             this.Show();
+            MessageBox.Show("start");
             board.DarwBorder();
             board.DrawRect(player.cur, Constants.Player, player.size);
             monstercnt = Constants.MonsterCnt;
@@ -84,7 +90,7 @@ namespace Hopscotch
             {
                 if (monster[i].act)
                 {
-                    board.UpdateBoard(monster[i].cur, Constants.Empty, monster[i].size);
+                    board.DrawRect(monster[i].cur, board.GetBoard(monster[i].cur), monster[i].size);
 
                     int[] overlap = new int[9];
                     int overlapcnt = 0;
@@ -110,14 +116,14 @@ namespace Hopscotch
                     int check = board.GetBoard(p_tmp);
                     if (check == Constants.Player || check == Constants.Path)
                     {
-                        board.UpdateBoard(p_tmp, Constants.Over, monster[i].size);
+                        board.DrawRect(p_tmp, Constants.Over, monster[i].size);
                         Game_Over();
                     }
                     else
                     {
                         monster[i].cur = p_tmp;
                         monster[i].direc = d_tmp;
-                        board.UpdateBoard(monster[i].cur, Constants.Monster, monster[i].size);
+                        board.DrawRect(monster[i].cur, Constants.Monster, monster[i].size);
                     }
                 }
             }
@@ -156,15 +162,23 @@ namespace Hopscotch
 
         void Game_Over()
         {
-            if (MessageBox.Show("Game Over\n", "", MessageBoxButtons.RetryCancel) == DialogResult.Retry)
-            {
-                InitStage();
-                GameStart();
-            }
+            (player.chance)--;
+            if (player.chance == 0)
+                if (MessageBox.Show("Game Over\n", "", MessageBoxButtons.RetryCancel) == DialogResult.Retry)
+                {
+                    InitStage();
+                    GameStart();
+                }
+                else
+                {
+                    timer.Dispose();
+                    this.Close();
+                }
             else
             {
-                timer.Dispose();
-                this.Close();
+                MessageBox.Show("♥ : "+player.chance);
+                InitStage();
+                GameStart();
             }
         }
 
@@ -195,7 +209,7 @@ namespace Hopscotch
             board_col = Constants.Board_Width / Constants.Block_Width;
             panel_board = new Panel();
             panel_board.Size = new Size(Constants.Board_Width, Constants.Board_Height);
-            panel_board.Location = new Point(0, 0);
+            panel_board.Location = new Point(0, 50);
             panel_board.BackColor = color[Constants.Empty];
 
             board = new int[board_row, board_col];
@@ -250,14 +264,10 @@ namespace Hopscotch
             int i = p.Y / Constants.Block_Height;
             int j = p.X / Constants.Block_Width;
 
-            if (val == Constants.Over)
-                lock(board_lock)
+            if (board[i, j] != Constants.Area)
+                lock (board_lock)
                     board[i, j] = val;
-            else
-                if (board[i,j] != Constants.Area)
-                    lock (board_lock)
-                        board[i, j] = val;
-            DrawRect(p, board[i,j], size);
+            DrawRect(p, board[i, j], size);
 
             if (val == Constants.Area)
                 empty_cnt--;
@@ -387,6 +397,8 @@ namespace Hopscotch
 
     class Player
     {
+        public String ID;
+
         public Point cur;
         public Point prev;
 
@@ -397,11 +409,14 @@ namespace Hopscotch
         public Size size;
 
         public bool draw;
+
+        public int chance;
         
 
         public Player()
         {
             size = new Size(Constants.Block_Width, Constants.Block_Height);
+            chance = 3;
             InitPlayer();
         }
 

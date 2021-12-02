@@ -38,7 +38,8 @@ namespace Hopscotch
             {
                 user.SetID(ID);
                 user.SetMode(mode);
-                game = new Game(mode, 1);
+
+                game = new Game(user.GetID(), mode, 1);
                 game.GameStart();
             }
         }
