@@ -19,6 +19,7 @@ namespace Hopscotch
         Board board;
         Monster[] monster;
         int monstercnt;
+        int remainmonster;
 
         public Game(int mode, int stage)
         {
@@ -55,13 +56,14 @@ namespace Hopscotch
             Random rand = new Random();
             for (int i = 0; i < monstercnt; i++)
                 monster[i] = new Monster(rand);
+            remainmonster = monstercnt;
             timer.Start();
         }
 
         void TimeElapsed(object sender, ElapsedEventArgs e)
         {
             timer.Stop();
-            if (board.empty_cnt < Constants.ClearEmptyCnt)
+            if (remainmonster == 0)
             {
                 if (stage < Constants.TotalStage)
                 {
@@ -80,25 +82,43 @@ namespace Hopscotch
 
             for (int i = 0; i < monstercnt; i++)
             {
-                board.UpdateBoard(monster[i].cur, Constants.Empty, monster[i].size);
-                Point p_tmp = monster[i].GetNextPoint(monster[i].direc);
-                int d_tmp = monster[i].direc;
-                while (board.GetBoard(p_tmp) == Constants.Area)
+                if (monster[i].act)
                 {
-                    monster[i].RandDirec(ref d_tmp);
-                    p_tmp = monster[i].GetNextPoint(d_tmp);
-                }
-                int check = board.GetBoard(p_tmp);
-                if (check == Constants.Player || check == Constants.Path)
-                {
-                    board.UpdateBoard(p_tmp, Constants.Over, monster[i].size);
-                    Game_Over();
-                }
-                else
-                {
-                    monster[i].cur = p_tmp;
-                    monster[i].direc = d_tmp;
-                    board.UpdateBoard(monster[i].cur, Constants.Monster, monster[i].size);
+                    board.UpdateBoard(monster[i].cur, Constants.Empty, monster[i].size);
+
+                    int[] overlap = new int[9];
+                    int overlapcnt = 0;
+                    Point p_tmp = monster[i].GetNextPoint(monster[i].direc);
+                    int d_tmp = monster[i].direc;
+                    while (board.GetBoard(p_tmp) == Constants.Area && overlapcnt < 8)
+                    {
+                        monster[i].RandDirec(ref d_tmp);
+                        if (overlap[d_tmp] == 0)
+                        {
+                            overlapcnt++;
+                            overlap[d_tmp] = 1;
+                        }
+                        p_tmp = monster[i].GetNextPoint(d_tmp);
+                    }
+                    if (overlapcnt == 8)
+                    {
+                        monster[i].act = false;
+                        board.DrawRect(monster[i].cur, Constants.Area, monster[i].size);
+                        remainmonster--;
+                        continue;
+                    }
+                    int check = board.GetBoard(p_tmp);
+                    if (check == Constants.Player || check == Constants.Path)
+                    {
+                        board.UpdateBoard(p_tmp, Constants.Over, monster[i].size);
+                        Game_Over();
+                    }
+                    else
+                    {
+                        monster[i].cur = p_tmp;
+                        monster[i].direc = d_tmp;
+                        board.UpdateBoard(monster[i].cur, Constants.Monster, monster[i].size);
+                    }
                 }
             }
             timer.Start();
@@ -111,7 +131,6 @@ namespace Hopscotch
                 player.Move(e.KeyCode);
                 board.UpdateBoard(player.prev, Constants.Path, player.size);
                 board.DrawRect(player.cur, Constants.Player, player.size);
-                board.DrawPlayer();D
 
                 if (board.GetBoard(player.prev) == Constants.Area && board.GetBoard(player.cur) == Constants.Empty)
                 {
@@ -164,7 +183,6 @@ namespace Hopscotch
         Graphics g;
         Color[] color = { Color.Black, Color.Red, Color.Green, Color.Yellow, Color.White, Color.Gray }; // Empty, Path, Area, , Monster, Player, Over
         SolidBrush[] brush;
-        Pen pen;
 
         int[,] board;
         int board_row, board_col;
@@ -186,7 +204,6 @@ namespace Hopscotch
             brush = new SolidBrush[Constants.Colorcnt];
             for (int i = 0; i < Constants.Colorcnt; i++)
                 brush[i] = new SolidBrush(color[i]);
-            pen = new Pen(color[Constants.Path]);
 
             board_lock = new object();
 
@@ -366,30 +383,12 @@ namespace Hopscotch
             lock (board_lock)
                 g.FillRectangle(brush[val], new Rectangle(p.X, p.Y, size.Width, size.Height));
         }
-
-        public void DrawPlayer(Point p, Keys d, Size size)
-        {
-            lock (board_lock)
-            {
-                g.FillRectangle(brush[Constants.Player], new Rectangle(p.X, p.Y, size.Width, size.Height));
-                switch(d)
-                {
-                    case Constants.Left:  break;
-                    case Constants.Right: break;
-                    case Constants.Down: break;
-                        
-                    case Constants.Up: break;
-                }
-                g.DrawLine(pen, );
-            }
-        }
     }
 
     class Player
     {
         public Point cur;
         public Point prev;
-        public Keys direc;
 
         public Point start;
         public Point end;
@@ -409,7 +408,6 @@ namespace Hopscotch
         public void InitPlayer()
         {
             cur = prev = new Point(Constants.StartX, Constants.StartY);
-            direc = 0;
             draw = false;
         }
 
@@ -427,24 +425,20 @@ namespace Hopscotch
 
         public void Move(Keys key)
         {
-            if (direc != key)
-                direc = key;
-            else
+            prev = cur;
+            switch (key)
             {
-                prev = cur;
-                switch (key)
-                {
-                    case Constants.Left: if (cur.X > 0) cur.X -= Constants.Block_Width; break;
-                    case Constants.Right: if (cur.X + Constants.Block_Width < Constants.Board_Width) cur.X += Constants.Block_Width; break;
-                    case Constants.Down: if (cur.Y + Constants.Block_Height < Constants.Board_Height) cur.Y += Constants.Block_Height; break;
-                    case Constants.Up: if (cur.Y > 0) cur.Y -= Constants.Block_Height; break;
-                }
+                case Constants.Left: if (cur.X > 0) cur.X -= Constants.Block_Width; break;
+                case Constants.Right: if (cur.X + Constants.Block_Width < Constants.Board_Width) cur.X += Constants.Block_Width; break;
+                case Constants.Down: if (cur.Y + Constants.Block_Height < Constants.Board_Height) cur.Y += Constants.Block_Height; break;
+                case Constants.Up: if (cur.Y > 0) cur.Y -= Constants.Block_Height; break;
             }
         }
     }
 
     class Monster
     {
+        public bool act;
         public Point cur;
         public Size size;
         public int direc;
@@ -455,17 +449,11 @@ namespace Hopscotch
             this.rand = rand;
             size = new Size(Constants.Monster_Width, Constants.Monster_Height);
             InitMonster();
-            /*
-            if (n == totalcnt - 1)
-                size = new Size(Constants.Boss_Width, Constants.Boss_Height);
-            else
-                size = new Size(Constants.Monster_Width, Constants.Monster_Height);
-            */
-            //game_over = false;
         }
 
         public void InitMonster()
         {
+            act = true;
             RandPoint();
             RandDirec(ref direc);
         }
@@ -496,18 +484,15 @@ namespace Hopscotch
 
         public void RandDirec(ref int d)
         {
-            d = rand.Next(1, 9 * 9 * 9) % 8 + 1;
+            d = rand.Next(1, 9); // 1~8
         }
     }
 
     static class Constants
     {
-        //public const String MainImage = "./res/Image/Main.bmp";
-
         public const int Board_Width = 600, Board_Height = 500;
         public const int Block_Width = 10, Block_Height = 10;
         public const int Monster_Width = 10, Monster_Height = 10;
-       // public const int Boss_Width = 100, Boss_Height = 100;
 
         public const int Empty = 0;
         public const int Path = 1;
