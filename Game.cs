@@ -166,6 +166,7 @@ namespace Hopscotch
             if (player.chance == 0)
                 if (MessageBox.Show("Game Over\n", "", MessageBoxButtons.RetryCancel) == DialogResult.Retry)
                 {
+                    player.chance = 3;
                     InitStage();
                     GameStart();
                 }
@@ -294,6 +295,7 @@ namespace Hopscotch
             else
             {
                 if (lt.X == rb.X)
+                {
                     if (lt.X == e.X)
                     {
                         Point left = lt, right = lt;
@@ -315,7 +317,9 @@ namespace Hopscotch
                     }
                     else
                         lt.X = e.X;
+                }
                 else if (lt.Y == rb.Y)
+                {
                     if (lt.Y == e.Y)
                     {
                         Point up = lt, down = lt;
@@ -337,6 +341,7 @@ namespace Hopscotch
                     }
                     else
                         lt.Y = e.Y;
+                }
                 res.X = (lt.X + rb.X) / 2 / Constants.Block_Width * Constants.Block_Width;
                 res.Y = (lt.Y + rb.Y) / 2 / Constants.Block_Height * Constants.Block_Height;
             }
