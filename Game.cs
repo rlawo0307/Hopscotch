@@ -114,7 +114,7 @@ namespace Hopscotch
                         continue;
                     }
                     int check = board.GetBoard(p_tmp);
-                    if (check == Constants.Player || check == Constants.Path)
+                    if (p_tmp.Equals(player.cur) || check == Constants.Path)
                     {
                         board.DrawRect(p_tmp, Constants.Over, monster[i].size);
                         Game_Over();
@@ -523,7 +523,7 @@ namespace Hopscotch
 
         public const int Colorcnt = 6;
         public const int MonsterCnt = 3;
-        public const int TotalStage = 2;
+        public const int TotalStage = 3;
 
         public const double Speed = 10;
         public const int ClearEmptyCnt = 1000;
